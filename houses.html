@@ -580,7 +580,7 @@ var filt = {
   st: ui.st || { onsale: true, pending: true, sold: true, unknown: true },
   oh: !!ui.oh, region: ui.region || '', q: '', sort: ui.sort || 'region'
 };
-var lastPull = 0, apiState = 'init', apiError = '';
+var lastPull = 0, apiState = 'init', apiError = '', fitted = false;
 
 function saveUI() { save(K_UI, { view: view, st: filt.st, oh: filt.oh, region: filt.region, sort: filt.sort }); }
 
@@ -660,8 +660,9 @@ function pillIdle() {
   setPill('busy', '读取中…');
 }
 
-function pull() {
-  setPill('busy', '读取中…');
+function pull(attempt) {
+  attempt = attempt || 0;
+  setPill('busy', attempt ? '读取中…（重试）' : '读取中…');
   return fetch(API_URL + '?view=houses&t=' + Date.now(), { redirect: 'follow' })
     .then(function (r) { return r.json(); })
     .then(function (j) {
@@ -672,10 +673,14 @@ function pull() {
       cache = { houses: j.houses, at: j.at }; save(K_CACHE, cache);
       apiState = 'ok'; apiError = ''; lastPull = Date.now();
       rebuild(); renderBanner();
+      if (!fitted && view === 'map') { fitted = true; fitHouses(); }
       if (queue.length) flush(); else pillIdle();
     })
     .catch(function (err) {
-      apiState = 'off'; apiError = String(err && err.message || err);
+      var msg = String(err && err.message || err);
+      // Apps Script 偶尔冷启动超时会回一张 HTML 错误页，自动再试两次
+      if (msg !== 'NO_ROUTE' && attempt < 2) return new Promise(function (ok) { setTimeout(ok, 1500 * (attempt + 1)); }).then(function () { return pull(attempt + 1); });
+      apiState = 'off'; apiError = /Unexpected token|JSON/.test(msg) ? 'Apps Script 没有正常返回数据' : msg;
       renderBanner(); pillIdle();
       if (!cache) rebuild();
     });
@@ -1378,6 +1383,7 @@ function renderAll() {
 }
 function setView(v) {
   view = v; saveUI();
+  if (v === 'map' && !fitted && houses.length) { fitted = true; setTimeout(function () { fitHouses(); }, 0); }
   document.querySelectorAll('.views button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-view') === v); });
   $('#v-map').hidden = v !== 'map'; $('#v-oh').hidden = v !== 'oh'; $('#v-table').hidden = v !== 'table';
   renderAll();
@@ -1443,9 +1449,9 @@ function toast(msg, err) {
 drawStatic();
 setView(view);
 rebuild();
-requestAnimationFrame(function () { fitAspect(); fitHouses(); });
+requestAnimationFrame(function () { fitAspect(); fitHouses(); if (cache && cache.houses && cache.houses.length) fitted = true; });
 pillIdle();
-pull().then(function () { if (view === 'map') fitHouses(); });
+pull();
 
 })();
 </script>
