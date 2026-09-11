@@ -673,7 +673,7 @@ function pull(attempt) {
       cache = { houses: j.houses, at: j.at }; save(K_CACHE, cache);
       apiState = 'ok'; apiError = ''; lastPull = Date.now();
       rebuild(); renderBanner();
-      if (!fitted && view === 'map') { fitted = true; fitHouses(); }
+      tryFirstFit();
       if (queue.length) flush(); else pillIdle();
     })
     .catch(function (err) {
@@ -1042,8 +1042,8 @@ function drawLabels(u, vis) {
 
 function fitHouses(list) {
   list = (list || visible()).filter(function (h) { return h.lat != null; });
-  var r = svg.getBoundingClientRect(); if (!r.width) return;
-  if (!list.length) { V = { x: 0, y: 0, w: MW, h: MH }; fitAspect(); applyView(); return; }
+  var r = svg.getBoundingClientRect(); if (!r.width || !r.height) return false;
+  if (!list.length) { V = { x: 0, y: 0, w: MW, h: MH }; fitAspect(); applyView(); return false; }
   var xs = list.map(function (h) { return px(h.lng); }), ys = list.map(function (h) { return py(h.lat); });
   G.LANDMARKS.forEach(function (lm) { xs.push(px(lm.lng)); ys.push(py(lm.lat)); });
   var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
@@ -1052,7 +1052,10 @@ function fitHouses(list) {
   if (h / w > asp) w = h / asp; else h = w * asp;
   V = { x: (x0 + x1) / 2 - w / 2, y: (y0 + y1) / 2 - h / 2, w: w, h: h };
   applyView();
+  return true;
 }
+/* 第一次有数据、并且地图有尺寸的时候，自动缩放到全部房源（只做一次，之后尊重手动缩放） */
+function tryFirstFit() { if (!fitted && view === 'map' && houses.length && fitHouses()) fitted = true; }
 function zoomAt(p, f) {
   var nw = Math.max(45, Math.min(MW * 1.6, V.w * f)); f = nw / V.w;
   V.x = p.x - (p.x - V.x) * f; V.y = p.y - (p.y - V.y) * f; V.w = nw; V.h *= f;
@@ -1123,7 +1126,7 @@ function centerOn(h) {
   $('#zin').onclick = function () { zoomAt({ x: V.x + V.w / 2, y: V.y + V.h / 2 }, 1 / 1.5); };
   $('#zout').onclick = function () { zoomAt({ x: V.x + V.w / 2, y: V.y + V.h / 2 }, 1.5); };
   $('#zfit').onclick = function () { fitHouses(); };
-  var ro = new ResizeObserver(function () { fitAspect(); applyView(); });
+  var ro = new ResizeObserver(function () { fitAspect(); applyView(); tryFirstFit(); });
   ro.observe(svg);
 })();
 function toggleRing(id) { ringOn[id] = !ringOn[id]; save('houses:rings', ringOn); drawScaled(); }
@@ -1383,7 +1386,7 @@ function renderAll() {
 }
 function setView(v) {
   view = v; saveUI();
-  if (v === 'map' && !fitted && houses.length) { fitted = true; setTimeout(function () { fitHouses(); }, 0); }
+  if (v === 'map') setTimeout(tryFirstFit, 0);
   document.querySelectorAll('.views button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-view') === v); });
   $('#v-map').hidden = v !== 'map'; $('#v-oh').hidden = v !== 'oh'; $('#v-table').hidden = v !== 'table';
   renderAll();
@@ -1449,7 +1452,7 @@ function toast(msg, err) {
 drawStatic();
 setView(view);
 rebuild();
-requestAnimationFrame(function () { fitAspect(); fitHouses(); if (cache && cache.houses && cache.houses.length) fitted = true; });
+tryFirstFit();
 pillIdle();
 pull();
 
