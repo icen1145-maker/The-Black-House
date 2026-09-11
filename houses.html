@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>看房板 · The Black House</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f2f0ec; --paper-2:#e7e4de; --card:#faf9f6;
+  --ink:#1e2328; --ink-2:#4c545c; --ink-3:#7d858d;
+  --rule:#c9c5bd; --rule-2:#ded9d1;
+  --blue:#1f5f8b; --blue-soft:#dde8ef;
+  --flag:#9c3a22; --flag-soft:#f2e2dc; --done:#41714f; --done-soft:#e1ebe3;
+  --onsale:#3a7d52; --pending:#c08a1e; --sold:#a2412a; --unk:#8d949b;
+  --water:#d3dde1; --land:#f8f6f1; --zip:#e2ddd3; --zipon:#ece6d9; --hwy:#cfc7b9; --hwy2:#bdb3a2;
+  --mark:#1f5f8b;
+  --sans:"Barlow","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --cond:"Barlow Condensed","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --nav:48px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:64px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--blue)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* ---------- 站点导航（两页共用） ---------- */
+.site{position:sticky;top:0;z-index:60;height:var(--nav);display:flex;align-items:stretch;gap:2px;padding:0 20px;background:var(--ink);color:var(--paper)}
+.site .brand{font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--paper);text-decoration:none;display:flex;align-items:center;margin-right:22px;white-space:nowrap}
+.site .brand i{display:inline-block;width:11px;height:11px;background:var(--paper);margin-right:9px;transform:translateY(-1px)}
+.site .tab{display:flex;align-items:center;padding:0 14px;color:#a9b0b6;text-decoration:none;font-family:var(--cond);font-weight:600;font-size:17px;letter-spacing:.02em;border-bottom:3px solid transparent;border-top:3px solid transparent;white-space:nowrap}
+.site .tab:hover{color:#fff}
+.site .tab[aria-current="page"]{color:#fff;border-bottom-color:#8fb3cc}
+
+.wrap{padding-inline:28px;max-width:1480px;margin:0 auto}
+
+/* ---------- 页头 ---------- */
+header.top{padding-block:34px 0}
+.titlerow{display:flex;align-items:flex-end;gap:12px 16px;flex-wrap:wrap}
+h1{font-family:var(--cond);font-size:clamp(38px,5.4vw,58px);line-height:1;font-weight:700;margin:0;letter-spacing:.01em}
+.titlerow .grow{flex:1}
+.sub{color:var(--ink-2);font-size:15.5px;margin:12px 0 22px;max-width:74ch}
+.btn{appearance:none;border:1px solid var(--ink);background:transparent;padding:7px 14px;border-radius:2px;cursor:pointer;font-weight:600;font-size:14px;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;line-height:1.3}
+.btn:hover{background:var(--paper-2)}
+.btn.solid{background:var(--ink);color:var(--paper)}
+.btn.solid:hover{background:#000}
+.btn.quiet{border-color:var(--rule);color:var(--ink-2);font-weight:500}
+.btn.quiet:hover{border-color:var(--ink-3);color:var(--ink);background:transparent}
+.btn:disabled{opacity:.4;cursor:default}
+
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink-3);flex:none}
+.pill.ok::before{background:var(--done)}
+.pill.busy::before{background:var(--blue);animation:blink 1s infinite}
+.pill.off::before{background:var(--flag)}
+@keyframes blink{50%{opacity:.25}}
+
+/* 统计条：沿用时间表的方格纸样式 */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--ink);
+  background:repeating-linear-gradient(90deg,transparent 0 19px,var(--rule-2) 19px 20px),repeating-linear-gradient(0deg,transparent 0 19px,var(--rule-2) 19px 20px),var(--paper)}
+.stat{appearance:none;border:0;border-right:1px solid var(--rule);background:transparent;text-align:left;padding:12px 14px 11px;cursor:pointer;min-width:0}
+.stat:last-child{border-right:0}
+.stat:hover{background:rgba(221,232,239,.7)}
+.stat.on{background:var(--blue-soft);box-shadow:inset 0 -3px 0 var(--blue)}
+.stat .k{display:flex;align-items:center;gap:7px;font-family:var(--cond);font-weight:600;font-size:14px;color:var(--ink-2);line-height:1.1}
+.stat .k i{width:9px;height:9px;border-radius:50%;flex:none}
+.stat .v{display:block;font-family:var(--cond);font-weight:700;font-size:32px;line-height:1.05;margin-top:5px}
+.stat .d{display:block;font-size:12px;color:var(--ink-3);line-height:1.3;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- 工具条 ---------- */
+.toolbar{padding-block:18px 14px;border-bottom:2px solid var(--ink);display:grid;gap:12px}
+.tb-row{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;min-width:0}
+.tb-row .grow{flex:1}
+.views{display:flex;border:1px solid var(--ink);border-radius:2px;overflow:hidden;flex:none}
+.views button{appearance:none;border:0;border-right:1px solid var(--ink);background:transparent;padding:7px 15px;cursor:pointer;font-family:var(--cond);font-weight:600;font-size:16px;line-height:1.2}
+.views button:last-child{border-right:0}
+.views button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.chip{appearance:none;border:1px solid var(--rule);background:var(--card);border-radius:20px;padding:4px 11px 4px 9px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);white-space:nowrap;line-height:1.3}
+.chip i{width:8px;height:8px;border-radius:50%;flex:none}
+.chip b{font-weight:600;color:var(--ink-3)}
+.chip.on{border-color:var(--ink);color:var(--ink);background:#fff}
+.chip.on b{color:var(--ink)}
+.chip.off{opacity:.55;text-decoration:line-through;text-decoration-color:var(--ink-3)}
+.fsel,.search{border:1px solid var(--rule);background:var(--card);border-radius:2px;padding:5px 8px;font-size:13.5px;height:32px;max-width:100%}
+#region{max-width:240px}
+.search{width:200px}
+.fsel:focus,.search:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+
+/* ---------- 地图视图 ---------- */
+.v-map{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(360px,1fr);gap:0 26px;padding-top:18px}
+.mapcol{position:sticky;top:calc(var(--nav) + 14px);height:calc(100vh - var(--nav) - 28px);min-height:420px}
+.mapbox{position:relative;height:100%;border:1px solid var(--ink);background:var(--water);overflow:hidden}
+svg#map{display:block;width:100%;height:100%;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+svg#map.drag{cursor:grabbing}
+.land{fill:var(--land);stroke:#b9c3c2;stroke-width:1;vector-effect:non-scaling-stroke}
+.zipb{fill:none;stroke:var(--zip);stroke-width:.7;vector-effect:non-scaling-stroke}
+.zipb.has{fill:var(--zipon);stroke:#d3cbbb}
+.ziplab{fill:#b2a996;pointer-events:none;font-family:var(--sans);letter-spacing:.03em}
+.hwy{fill:none;stroke:var(--hwy);stroke-width:1.6px;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.hwy.major{stroke:var(--hwy2);stroke-width:2.4px}
+.shield rect{fill:#fff;stroke:#a89e8c;stroke-width:.8;vector-effect:non-scaling-stroke}
+.shield text{fill:#6f6656;font-family:var(--cond);font-weight:700;pointer-events:none}
+.city{fill:var(--ink-3);font-family:var(--sans);letter-spacing:.05em;pointer-events:none}
+.city.major{fill:var(--ink-2);font-weight:700;letter-spacing:.2em}
+.terrain{fill:#a3aea2;letter-spacing:.3em;pointer-events:none;font-family:var(--sans)}
+.bay{fill:#8aa0aa;letter-spacing:.4em;pointer-events:none;font-family:var(--sans)}
+.lm{cursor:pointer}
+.lm .gly{fill:var(--mark)}
+.lm .hit{fill:transparent}
+.lm.on .gly{fill:#0f3d5e}
+.lmlab{fill:var(--mark);font-weight:700;font-family:var(--cond);paint-order:stroke;stroke:var(--land);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.ring{fill:rgba(31,95,139,.05);stroke:var(--mark);stroke-width:1.2;stroke-dasharray:5 5;vector-effect:non-scaling-stroke;pointer-events:none}
+.ringlab{fill:var(--mark);font-family:var(--cond);font-weight:600;pointer-events:none;paint-order:stroke;stroke:var(--land);stroke-width:3px}
+.pin{cursor:pointer}
+.pin .dot{stroke:#fff;stroke-width:2;vector-effect:non-scaling-stroke}
+.pin.approx .dot{stroke:var(--ink);stroke-dasharray:2 2;stroke-width:1.2}
+.pin .halo{fill:none;stroke:var(--ink);stroke-width:1.6;vector-effect:non-scaling-stroke}
+.pin .flagpole{stroke:var(--ink);stroke-width:1.3;vector-effect:non-scaling-stroke}
+.pin .flag{fill:var(--ink)}
+.pin.dim{opacity:.22}
+.pin.hot .dot{stroke:var(--ink);stroke-width:2.4}
+.plab{font-family:var(--sans);font-weight:600;fill:var(--ink);paint-order:stroke;stroke:rgba(248,246,241,.95);stroke-width:3.2px;stroke-linejoin:round;pointer-events:none}
+.plab.sel{font-weight:700}
+.mapctl{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;border:1px solid var(--ink);background:var(--card)}
+.mapctl button{appearance:none;border:0;border-bottom:1px solid var(--rule);background:transparent;width:34px;height:34px;cursor:pointer;font-size:18px;line-height:1;display:grid;place-items:center;color:var(--ink)}
+.mapctl button:last-child{border-bottom:0}
+.mapctl button:hover{background:var(--paper-2)}
+.legend{position:absolute;left:12px;bottom:12px;right:12px;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink-2);pointer-events:none}
+.legend span{display:inline-flex;align-items:center;gap:6px;background:rgba(250,249,246,.9);padding:2px 7px;border-radius:2px}
+.legend i{width:9px;height:9px;border-radius:50%}
+.maphint{position:absolute;top:12px;left:12px;font-size:12px;color:var(--ink-2);background:rgba(250,249,246,.9);padding:3px 8px;border-radius:2px;pointer-events:none;max-width:calc(100% - 80px)}
+
+/* 列表 */
+.listhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--ink);margin-bottom:4px}
+.listhead h2{font-family:var(--cond);font-size:22px;margin:0;font-weight:700}
+.listhead .count{font-size:13px;color:var(--ink-3)}
+.group{font-family:var(--cond);font-weight:600;font-size:14px;color:var(--ink-3);letter-spacing:.04em;padding:18px 0 6px;border-bottom:1px solid var(--rule-2)}
+.card{position:relative;padding:15px 12px 15px 16px;border-bottom:1px solid var(--rule-2);cursor:pointer;outline:none;transition:background .12s ease}
+.card::before{content:"";position:absolute;left:0;top:15px;bottom:15px;width:3px;background:var(--st,var(--unk))}
+.card:hover,.card.hot{background:rgba(255,255,255,.55)}
+.card.sel{background:#fff;box-shadow:inset 0 0 0 1px var(--ink)}
+.card:focus-visible{box-shadow:inset 0 0 0 2px var(--blue)}
+.c-top{display:flex;align-items:baseline;gap:12px}
+.c-top h3{margin:0;font-size:17px;font-weight:600;line-height:1.3;flex:1;min-width:0}
+.c-price{font-family:var(--cond);font-weight:700;font-size:21px;line-height:1.1;white-space:nowrap}
+.c-price.none{color:var(--ink-3);font-weight:500;font-size:15px}
+.c-sub{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:13px;color:var(--ink-3);margin-top:3px}
+.st{display:inline-flex;align-items:center;gap:5px;font-family:var(--cond);font-weight:600;font-size:13.5px;color:var(--st);letter-spacing:.02em;white-space:nowrap}
+.st::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--st)}
+.soldv{color:var(--ink-2)}
+.delta{font-weight:600}
+.delta.up{color:var(--flag)}
+.delta.down{color:var(--done)}
+.facts{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.fact{font-size:12.5px;background:var(--paper-2);padding:1px 7px;border-radius:2px;color:var(--ink-2);white-space:nowrap}
+.fact.oh{background:var(--ink);color:var(--paper);font-weight:600}
+.fact.approx{background:transparent;border:1px dashed var(--ink-3);color:var(--ink-3)}
+.fact.pend{background:var(--blue-soft);color:var(--blue);font-weight:600}
+.pc{margin:8px 0 0;font-size:14px;line-height:1.55;display:grid;grid-template-columns:16px 1fr;gap:1px 0}
+.pc span.m{font-weight:700;font-family:var(--cond);font-size:15px;line-height:1.45}
+.pc .pro{color:var(--done)} .pc .con{color:var(--flag)}
+.pc .empty{color:var(--ink-3);font-style:italic}
+.dist{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3);margin-top:8px}
+.dist b{font-weight:600;color:var(--ink-2)}
+.dist .near b{color:var(--blue)}
+.emptylist{padding:40px 0;color:var(--ink-3);text-align:center}
+
+/* ---------- 周末看房 ---------- */
+.v-oh{padding-top:24px}
+.ohnote{font-size:14px;color:var(--ink-2);border-left:3px solid var(--blue);background:var(--blue-soft);padding:10px 14px;margin:0 0 8px;max-width:80ch}
+.day{padding-top:30px}
+.dayhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--ink);padding-bottom:8px}
+.dayhead h2{font-family:var(--cond);font-size:30px;font-weight:700;margin:0;line-height:1.1}
+.dayhead .dd{font-size:14px;color:var(--ink-2)}
+.dayhead .grow{flex:1}
+.gantt{--label:clamp(170px,30%,320px);position:relative}
+.g-axis{display:grid;grid-template-columns:var(--label) 1fr;font-size:12px;color:var(--ink-3);padding:8px 0 4px}
+.g-axis .ticks{position:relative;height:16px}
+.g-axis .ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.g-axis .ticks span:first-child{transform:none}
+.g-axis .ticks span:last-child{transform:translateX(-100%)}
+.g-row{display:grid;grid-template-columns:var(--label) 1fr;align-items:center;border-bottom:1px solid var(--rule-2);min-height:54px;cursor:pointer}
+.g-row:hover{background:rgba(255,255,255,.55)}
+.g-lab{padding:8px 14px 8px 0;min-width:0}
+.g-lab strong{display:block;font-weight:600;font-size:15px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-lab small{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--ink-3)}
+.g-track{position:relative;height:54px;background:repeating-linear-gradient(90deg,transparent 0 calc(var(--hr) - 1px),var(--rule-2) calc(var(--hr) - 1px) var(--hr))}
+.g-bar{position:absolute;top:13px;height:28px;background:var(--st);color:#fff;font-size:12.5px;font-weight:600;display:flex;align-items:center;padding:0 8px;border-radius:2px;white-space:nowrap;overflow:hidden}
+.g-bar.pending{background:repeating-linear-gradient(135deg,var(--pending) 0 6px,#d9a94a 6px 12px)}
+.unparsed{font-size:13.5px;color:var(--ink-2);padding:10px 0}
+.unparsed code{background:var(--paper-2);padding:1px 5px;border-radius:2px}
+.ohempty{padding:48px 0;color:var(--ink-3)}
+
+/* ---------- 对比表 ---------- */
+.v-table{padding-top:18px}
+.tcap{font-size:13.5px;color:var(--ink-2);margin:0 0 10px}
+.tcap b{color:var(--blue)}
+.tscroll{overflow-x:auto;border:1px solid var(--ink);background:var(--card)}
+table.cmp{border-collapse:collapse;width:100%;font-size:13.5px;min-width:1180px}
+.cmp th{font-family:var(--cond);font-weight:600;font-size:14.5px;text-align:left;padding:9px 10px;border-bottom:1.5px solid var(--ink);white-space:nowrap;background:var(--paper);position:sticky;top:0;cursor:pointer;user-select:none}
+.cmp th:hover{color:var(--blue)}
+.cmp th.num,.cmp td.num{text-align:right}
+.cmp th .ar{color:var(--blue);font-size:11px;margin-left:3px}
+.cmp td{padding:9px 10px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+.cmp tr{cursor:pointer}
+.cmp tbody tr:hover{background:#fff}
+.cmp td.addr{font-weight:600;white-space:nowrap}
+.cmp td.addr small{display:block;font-weight:400;color:var(--ink-3);font-size:12px}
+.cmp td.txt{min-width:180px;max-width:260px;color:var(--ink-2);line-height:1.45}
+.cmp td.dim{color:var(--ink-3)}
+.cmp td.best{color:var(--blue);font-weight:600}
+
+/* ---------- 详情抽屉 ---------- */
+.scrim{position:fixed;inset:0;background:rgba(30,35,40,.28);z-index:70;opacity:0;pointer-events:none;transition:opacity .18s ease}
+.scrim.on{opacity:1;pointer-events:auto}
+@media (min-width:1061px){.scrim{display:none}}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(540px,100%);background:var(--paper);border-left:1px solid var(--ink);z-index:80;transform:translateX(102%);transition:transform .22s ease;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.d-head{padding:18px 22px 14px;border-bottom:1px solid var(--ink);display:flex;gap:12px;align-items:flex-start}
+.d-head .t{flex:1;min-width:0}
+.d-head h2{font-family:var(--cond);font-size:30px;line-height:1.05;margin:4px 0 4px;font-weight:700}
+.d-head .loc{font-size:13.5px;color:var(--ink-3)}
+.x{appearance:none;border:1px solid var(--rule);background:transparent;width:34px;height:34px;border-radius:2px;cursor:pointer;font-size:18px;line-height:1;flex:none}
+.x:hover{border-color:var(--ink)}
+.d-body{flex:1;overflow-y:auto;padding:0 22px 30px}
+.d-sec{padding:18px 0;border-bottom:1px solid var(--rule-2)}
+.d-sec:last-child{border-bottom:0}
+.d-sec h3{font-family:var(--cond);font-weight:600;font-size:14px;color:var(--ink-3);letter-spacing:.06em;margin:0 0 10px}
+.pricegrid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule)}
+.pricegrid div{padding:10px 12px;border-right:1px solid var(--rule)}
+.pricegrid div:last-child{border-right:0}
+.pricegrid small{display:block;font-size:12px;color:var(--ink-3)}
+.pricegrid b{font-family:var(--cond);font-size:24px;font-weight:700;line-height:1.2}
+.distbars{display:grid;gap:8px}
+.db{display:grid;grid-template-columns:78px 1fr 58px 96px;gap:10px;align-items:center;font-size:13.5px}
+.db .bar{height:8px;background:var(--paper-2);position:relative;border-radius:1px}
+.db .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--blue);border-radius:1px}
+.db .n{text-align:right;font-weight:600}
+.db a{font-size:12px}
+.links{display:flex;flex-wrap:wrap;gap:8px}
+.links a{font-size:13.5px;border:1px solid var(--rule);padding:4px 10px;border-radius:2px;text-decoration:none;color:var(--ink)}
+.links a:hover{border-color:var(--ink)}
+.form{display:grid;gap:14px}
+.f label{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:5px}
+.f input,.f textarea{width:100%;border:1px solid var(--rule);background:#fff;border-radius:2px;padding:8px 10px;font-size:15px}
+.f textarea{min-height:74px;resize:vertical;line-height:1.5}
+.f input:focus,.f textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.f .hint{font-size:12px;color:var(--ink-3);margin-top:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--ink);border-radius:2px;overflow:hidden}
+.seg button{appearance:none;border:0;border-right:1px solid var(--rule);background:#fff;padding:8px 4px;cursor:pointer;font-family:var(--cond);font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px}
+.seg button:last-child{border-right:0}
+.seg button i{width:8px;height:8px;border-radius:50%;background:var(--st)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.d-foot{border-top:1px solid var(--ink);padding:12px 22px;display:flex;gap:10px;align-items:center;background:var(--paper)}
+.d-foot .msg{flex:1;font-size:12.5px;color:var(--ink-3);min-width:0}
+.d-foot .msg.err{color:var(--flag)}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:2px;font-size:14px;opacity:0;pointer-events:none;transition:all .2s ease;z-index:90;max-width:calc(100% - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--flag)}
+
+.banner{border-left:3px solid var(--flag);background:var(--flag-soft);padding:10px 14px;font-size:14px;margin:0 0 16px}
+.banner code{background:rgba(255,255,255,.6);padding:1px 5px}
+
+footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width:1060px){
+  .v-map{grid-template-columns:1fr}
+  .mapcol{position:relative;top:0;height:56vh;min-height:320px;margin-bottom:18px}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .stat:nth-child(3){border-right:0}
+  .stat:nth-child(n+4){border-top:1px solid var(--rule)}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:16px}
+  .site{padding:0 12px}
+  .site .brand{margin-right:8px;font-size:13px;letter-spacing:.1em}
+  .site .brand span{display:none}
+  .site .tab{padding:0 10px;font-size:16px}
+  header.top{padding-block:22px 0}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat{border-top:1px solid var(--rule)}
+  .stat:nth-child(-n+2){border-top:0}
+  .stat:nth-child(3){border-right:1px solid var(--rule)}
+  .stat:nth-child(2n){border-right:0}
+  .stat:last-child{grid-column:1/-1}
+  .stat .v{font-size:26px}
+  .views{width:100%}
+  .views button{flex:1;padding-inline:6px}
+  .tb-row .grow{display:none}
+  .search{flex:1;width:auto;min-width:0}
+  #region{max-width:100%}
+  .titlerow h1{width:100%}
+  .mapcol{height:50vh}
+  .gantt{--label:0px}
+  .g-row{grid-template-columns:1fr}
+  .g-lab{padding:10px 0 0}
+  .g-track{height:44px}
+  .g-bar{top:8px}
+  .g-axis .ticks span.odd{display:none}
+  .dayhead .btn{width:100%;justify-content:center}
+  .titlerow .btn{padding:6px 10px}
+  .titlerow .pill{order:-1;width:100%}
+  .titlerow .grow{display:none}
+  .two{grid-template-columns:1fr}
+  .pricegrid b{font-size:20px}
+  .d-head,.d-body,.d-foot{padding-inline:16px}
+}
+@media print{ .site,.toolbar,.mapctl,.drawer,.scrim{display:none!important} }
+</style>
+</head>
+<body>
+
+<nav class="site" aria-label="站点">
+  <a class="brand" href="./"><i></i><span>The Black House</span></a>
+  <a class="tab" href="./">购房时间表</a>
+  <a class="tab" href="houses.html" aria-current="page">看房板</a>
+</nav>
+
+<div class="wrap">
+<header class="top">
+  <div class="titlerow">
+    <h1>看房板</h1>
+    <span class="grow"></span>
+    <span class="pill" id="pill">读取中…</span>
+    <button class="btn quiet" id="refreshBtn" type="button">刷新</button>
+    <a class="btn quiet" id="sheetLink" target="_blank" rel="noopener">打开表格 ↗</a>
+    <button class="btn solid" id="addBtn" type="button">＋ 记一处房源</button>
+  </div>
+  <p class="sub">数据来自 HouseHunting 表格的 <strong>2026</strong> tab。这里改的状态、价格、优缺点会直接写回表格；在表格里改了，点「刷新」就能看到。</p>
+  <div id="banner"></div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="toolbar">
+  <div class="tb-row">
+    <div class="views" role="tablist" aria-label="视图">
+      <button role="tab" data-view="map" aria-selected="true">地图</button>
+      <button role="tab" data-view="oh" aria-selected="false">周末看房</button>
+      <button role="tab" data-view="table" aria-selected="false">对比表</button>
+    </div>
+    <span class="grow"></span>
+    <input class="search" id="q" type="search" placeholder="搜地址 / 优缺点" aria-label="搜索">
+    <select class="fsel" id="sort" aria-label="排序">
+      <option value="region">按区域</option>
+      <option value="status">按状态</option>
+      <option value="price-asc">价格 低→高</option>
+      <option value="price-desc">价格 高→低</option>
+      <option value="d-paypal">离 PayPal 近</option>
+      <option value="d-doordash">离 DoorDash 近</option>
+      <option value="d-sjc">离 SJC 近</option>
+      <option value="sheet">表格顺序</option>
+    </select>
+  </div>
+  <div class="tb-row filters" id="filters">
+    <span id="stchips" style="display:contents"></span>
+    <button class="chip" id="ohOnly" type="button" aria-pressed="false">⚑ 只看有 Open House</button>
+    <select class="fsel" id="region" aria-label="区域"></select>
+  </div>
+</div>
+
+<main>
+  <section class="v-map" id="v-map">
+    <div class="mapcol">
+      <div class="mapbox" id="mapbox">
+        <svg id="map" role="img" aria-label="南湾房源地图">
+          <rect id="water" x="-3000" y="-3000" width="7000" height="7000" style="fill:var(--water)"/>
+          <g id="gLand"></g><g id="gZip"></g><g id="gHwy"></g><g id="gPlace"></g>
+          <g id="gRing"></g><g id="gLm"></g><g id="gPin"></g><g id="gLab"></g>
+        </svg>
+        <div class="maphint" id="maphint">点公司/机场图标画 5 英里圈 · 滚轮缩放 · 拖拽平移</div>
+        <div class="mapctl">
+          <button type="button" id="zin" aria-label="放大">＋</button>
+          <button type="button" id="zout" aria-label="缩小">−</button>
+          <button type="button" id="zfit" aria-label="显示全部房源" title="显示全部房源">⤢</button>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--onsale)"></i>On Sale</span>
+          <span><i style="background:var(--pending)"></i>Pending</span>
+          <span><i style="background:var(--sold)"></i>Sold</span>
+          <span><i style="background:var(--unk)"></i>未标</span>
+          <span>⚑ 有 open house</span>
+          <span>虚线点＝位置估算</span>
+        </div>
+      </div>
+    </div>
+    <div class="listcol">
+      <div class="listhead"><h2>房源</h2><span class="count" id="count"></span></div>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <section class="v-oh" id="v-oh" hidden></section>
+  <section class="v-table" id="v-table" hidden>
+    <p class="tcap">点表头排序。<b>蓝字</b>是还没卖掉的房源里这一列最好的（价格最低、面积最大、离得最近）。卧卫/面积/地皮/年份是从「优点」「硬伤」文字里认出来的。</p>
+    <div class="tscroll"><table class="cmp" id="cmp"></table></div>
+  </section>
+</main>
+
+<footer>表格：HouseHunting › 2026 · 读写走时间表同一个 Apps Script（Timeline_API） · 坐标由 Google 地理编码，缓存在脚本里，不写进表格。</footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-labelledby="dTitle">
+  <div class="d-head">
+    <div class="t">
+      <span class="st" id="dSt"></span>
+      <h2 id="dTitle"></h2>
+      <div class="loc" id="dLoc"></div>
+    </div>
+    <button class="x" id="dClose" type="button" aria-label="关闭">×</button>
+  </div>
+  <div class="d-body" id="dBody"></div>
+  <div class="d-foot">
+    <span class="msg" id="dMsg"></span>
+    <button class="btn quiet" id="dCancel" type="button">还原</button>
+    <button class="btn solid" id="dSave" type="button" disabled>保存到表格</button>
+  </div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="southbay-geo.js"></script>
+<script>
+(function () {
+'use strict';
+
+/* ================= 配置 ================= */
+// 和时间表（index.html）用的是同一个 Apps Script Web App
+var API_URL = "https://script.google.com/macros/s/AKfycbzj3pt4QLNik2OZtvNh-Dwad2YhkmchxzEu5hZo0nuqyn-hfBEHTqQczMGTxLIIDAZRUg/exec";
+var SHEET_URL = "https://docs.google.com/spreadsheets/d/1YGa-vX5OGd4QtGnFTO10vig_64VAHtCssWZkBfhoPws/edit";
+
+var K_CACHE = 'houses:cache:v1', K_QUEUE = 'houses:queue:v1', K_GEO = 'houses:geo:v1', K_UI = 'houses:ui:v1';
+
+var G = window.GEO;
+var STATUS = {
+  onsale:  { label: 'On Sale', write: 'On Sale', color: 'var(--onsale)',  rank: 0 },
+  pending: { label: 'Pending', write: 'Pending', color: 'var(--pending)', rank: 1 },
+  sold:    { label: 'Sold',    write: 'Sold',    color: 'var(--sold)',    rank: 2 },
+  unknown: { label: '未标',     write: '',        color: 'var(--unk)',     rank: 3 }
+};
+var ST_ORDER = ['onsale', 'pending', 'sold', 'unknown'];
+var CITY_NAMES = ['East Palo Alto', 'Redwood City', 'Mountain View', 'Santa Clara', 'Palo Alto', 'Menlo Park', 'Los Gatos', 'Los Altos',
+  'San Jose', 'Campbell', 'Sunnyvale', 'Milpitas', 'Cupertino', 'Saratoga', 'Fremont'];
+var DAY_ZH = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+/* ================= 小工具 ================= */
+function $(s, r) { return (r || document).querySelector(s); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function load(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function key(a) { return String(a || '').toLowerCase().replace(/[.,#]/g, ' ').replace(/\s+/g, ' ').trim(); }
+function hm(d) { return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+function mdy(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
+
+function stKey(s) {
+  var t = String(s || '').toLowerCase().replace(/[\s_-]+/g, '');
+  if (!t) return 'unknown';
+  if (/onsale|active|forsale|在售|comingsoon/.test(t)) return 'onsale';
+  if (/pend|contingent|签约/.test(t)) return 'pending';
+  if (/sold|closed|成交|已售/.test(t)) return 'sold';
+  return 'unknown';
+}
+
+function priceNum(t) {
+  var s = String(t || '').toLowerCase().replace(/[$,\s]/g, '');
+  var m = s.match(/^([\d.]+)(m|k)?/);
+  if (!m || !m[1] || isNaN(parseFloat(m[1]))) return null;
+  var n = parseFloat(m[1]);
+  if (m[2] === 'm') return n * 1e6;
+  if (m[2] === 'k') return n * 1e3;
+  return n < 100 ? n * 1e6 : (n < 10000 ? n * 1e3 : n);
+}
+function fmtP(n) {
+  if (n == null) return '';
+  if (n >= 1e6) {
+    var s = (n / 1e6).toFixed(3).replace(/0$/, '');
+    return '$' + s + 'M';
+  }
+  return '$' + Math.round(n / 1e3) + 'K';
+}
+function fmtN(n) { return n == null ? '' : Number(n).toLocaleString('en-US'); }
+
+function parseAddr(a) {
+  var s = String(a || '').replace(/\s+/g, ' ').trim();
+  var zip = (s.match(/\b(9[45]\d{3})\b/) || [])[1] || '';
+  var parts = s.split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+  var street = parts[0] || s, city = '';
+  if (parts.length >= 3) city = parts[1];
+  else {
+    for (var i = 0; i < CITY_NAMES.length; i++) {
+      var c = CITY_NAMES[i];
+      if (street.toLowerCase().slice(-c.length - 1) === ' ' + c.toLowerCase()) { street = street.slice(0, -c.length).trim(); city = c; break; }
+    }
+    if (!city && parts.length === 2 && !/^ca\b/i.test(parts[1])) city = parts[1].replace(/\s*ca\s*\d*$/i, '');
+  }
+  return { street: street, city: city, zip: zip };
+}
+
+/* 从优点/硬伤的文字里认出结构化信息（不改表格结构的前提下尽量结构化） */
+function parseFacts(text) {
+  var t = String(text || ''), f = {}, m;
+  m = t.match(/(\d+)\s*(?:bd|bed|beds|br|卧|房)\s*[\/,，、]?\s*(\d+(?:\.\d+)?)\s*(?:ba|bath|baths|卫)/i);
+  if (m) { f.bd = +m[1]; f.ba = +m[2]; }
+  var re = /(\d[\d,]{2,6})\s*(?:sq\.?\s*ft|sqft|平方英尺|尺)(\s*(?:的)?\s*(?:地|lot|占地))?/gi;
+  while ((m = re.exec(t))) {
+    var n = +m[1].replace(/,/g, '');
+    var before = t.slice(Math.max(0, m.index - 4), m.index);
+    if (m[2] || /(?:lot|地皮|占地|地)\s*$/i.test(before)) f.lot = f.lot || n;
+    else if (!f.sqft) f.sqft = n;
+  }
+  m = t.match(/(?:lot|地皮|占地)\s*[:：]?\s*(\d[\d,]{2,6})/i); if (m && !f.lot) f.lot = +m[1].replace(/,/g, '');
+  m = t.match(/((?:19|20)\d{2})\s*年(?:建|造|盖)?/) || t.match(/built\s*(?:in\s*)?((?:19|20)\d{2})/i);
+  if (m) f.year = +m[1];
+  return f;
+}
+
+/* Open House 文本 → [{day, s, e, raw}]，时间用小时（13.5 = 1:30pm） */
+function parseOH(txt) {
+  var out = [], bad = [];
+  String(txt || '').split(/[;；,，、\/\n]+/).forEach(function (seg) {
+    seg = seg.trim(); if (!seg) return;
+    var low = seg.toLowerCase(), day = null;
+    if (/sat|周六|星期六|礼拜六/.test(low)) day = 6;
+    else if (/sun|周日|周天|星期日|星期天|礼拜天/.test(low)) day = 0;
+    else if (/fri|周五|星期五/.test(low)) day = 5;
+    else if (/thu|周四/.test(low)) day = 4;
+    else if (/wed|周三/.test(low)) day = 3;
+    else if (/tue|周二/.test(low)) day = 2;
+    else if (/mon|周一/.test(low)) day = 1;
+    var m = low.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*[-–—~至到]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/);
+    if (day == null || !m) { bad.push(seg); return; }
+    var sh = +m[1] + (m[2] ? +m[2] / 60 : 0), eh = +m[4] + (m[5] ? +m[5] / 60 : 0);
+    var eap = m[6] || (m[3] === 'pm' ? 'pm' : (eh <= 8 ? 'pm' : ''));
+    if (eap === 'pm' && eh < 12) eh += 12;
+    if (m[3] === 'pm' && sh < 12) sh += 12;
+    else if (!m[3] && sh < 12 && sh + 12 <= eh) sh += 12;
+    if (eh <= sh) eh = sh + 2;
+    out.push({ day: day, s: sh, e: eh, raw: seg });
+  });
+  return { slots: out, bad: bad };
+}
+function hLabel(h) {
+  var hh = Math.floor(h), mm = Math.round((h - hh) * 60), ap = hh >= 12 ? 'pm' : 'am';
+  var h12 = hh % 12 || 12;
+  return h12 + (mm ? ':' + String(mm).padStart(2, '0') : '') + ap;
+}
+function slotLabel(sl) {
+  var a = hLabel(sl.s), b = hLabel(sl.e);
+  if (a.slice(-2) === b.slice(-2)) a = a.slice(0, -2);
+  return a + '–' + b;
+}
+function nextDate(day) {
+  var d = new Date(); d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + ((day - d.getDay() + 7) % 7));
+  return d;
+}
+
+function miles(a, b, c, d) {
+  var R = 3958.8, r = Math.PI / 180, dLat = (c - a) * r, dLng = (d - b) * r;
+  var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+/* ================= 状态 ================= */
+var cache = load(K_CACHE, null);          // 上次接口返回
+var queue = load(K_QUEUE, []);            // 还没写进表格的改动
+var geoCache = load(K_GEO, {});           // 浏览器端补的坐标
+var ui = load(K_UI, {});
+var houses = [];                          // 加工后的房源
+var selKey = null, hotKey = null;
+var view = ui.view || 'map';
+var filt = {
+  st: ui.st || { onsale: true, pending: true, sold: true, unknown: true },
+  oh: !!ui.oh, region: ui.region || '', q: '', sort: ui.sort || 'region'
+};
+var lastPull = 0, apiState = 'init', apiError = '';
+
+function saveUI() { save(K_UI, { view: view, st: filt.st, oh: filt.oh, region: filt.region, sort: filt.sort }); }
+
+/* 原始行 → 页面用的对象 */
+function enrich(raw, idx) {
+  var h = {
+    r: raw.r || null, idx: idx,
+    addr: raw.addr || '', cons: raw.cons || '', pros: raw.pros || '', price: raw.price || '',
+    sold: raw.sold || '', status: raw.status || '', oh: raw.oh || '',
+    lat: raw.lat, lng: raw.lng, geo: raw.geo || ''
+  };
+  h.k = key(h.addr);
+  var pa = parseAddr(h.addr);
+  h.street = pa.street; h.city = pa.city; h.zip = pa.zip;
+  h.st = stKey(h.status);
+  h.stLabel = h.st === 'unknown' && h.status ? h.status : STATUS[h.st].label;
+  h.priceN = priceNum(h.price); h.soldN = priceNum(h.sold);
+  h.delta = h.priceN && h.soldN ? (h.soldN - h.priceN) / h.priceN : null;
+  h.f = parseFacts(h.pros + ' ' + h.cons);
+  h.ppsf = h.priceN && h.f.sqft ? Math.round(h.priceN / h.f.sqft) : null;
+  h.region = (G.REGION && G.REGION[h.zip]) || '其他';
+  var oh = parseOH(h.oh); h.slots = oh.slots; h.ohBad = oh.bad;
+  h.pending = queue.some(function (op) { return key(op.addr || (op.fields && op.fields.addr)) === h.k || (op.fields && key(op.fields.addr) === h.k); });
+  locate(h);
+  h.d = {};
+  G.LANDMARKS.forEach(function (lm) { h.d[lm.id] = h.lat != null ? miles(h.lat, h.lng, lm.lat, lm.lng) : null; });
+  return h;
+}
+
+/* 坐标：接口 → 浏览器缓存 → 旧看房板里的精确坐标 → 邮编中心（估算） */
+function locate(h) {
+  if (h.lat != null && h.lng != null && h.geo !== 'approx') { h.approx = false; return; }
+  var gc = geoCache[h.k];
+  if (gc && gc.lat != null) { h.lat = gc.lat; h.lng = gc.lng; h.approx = false; return; }
+  var kn = G.KNOWN && G.KNOWN[(h.street + ' ' + h.zip).toLowerCase()];
+  if (kn) { h.lat = kn[0]; h.lng = kn[1]; h.approx = false; return; }
+  if (h.lat != null) { h.approx = true; return; }
+  var zc = G.ZIPC[h.zip];
+  if (zc) {
+    var s = 0; for (var i = 0; i < h.k.length; i++) s = (s * 31 + h.k.charCodeAt(i)) >>> 0;
+    h.lat = zc[0] + ((s % 100) / 100 - 0.5) * 0.012;
+    h.lng = zc[1] + (((s >> 8) % 100) / 100 - 0.5) * 0.015;
+    h.approx = true; return;
+  }
+  h.lat = null; h.lng = null; h.approx = true;
+}
+
+function rebuild() {
+  var rows = (cache && cache.houses) ? cache.houses.map(function (x) { return Object.assign({}, x); }) : [];
+  applyQueueTo(rows);
+  houses = rows.map(enrich);
+  renderAll();
+  geocodeMissing();
+}
+
+/* 把还没写进表格的改动叠加到数据上（乐观更新） */
+function applyQueueTo(rows) {
+  queue.forEach(function (op) {
+    var f = op.fields || {};
+    if (op.type === 'update') {
+      var k = key(op.addr);
+      for (var i = 0; i < rows.length; i++) if (key(rows[i].addr) === k) { Object.assign(rows[i], f); if (f.addr) { rows[i].lat = null; rows[i].lng = null; } return; }
+    } else if (op.type === 'add') {
+      var k2 = key(f.addr), hit = null;
+      rows.forEach(function (r) { if (key(r.addr) === k2) hit = r; });
+      if (hit) Object.assign(hit, f); else rows.push(Object.assign({ r: null }, f));
+    }
+  });
+}
+
+/* ================= 接口 ================= */
+function setPill(cls, txt) { var p = $('#pill'); p.className = 'pill' + (cls ? ' ' + cls : ''); p.textContent = txt; }
+function pillIdle() {
+  if (queue.length) return setPill('busy', '待写入 ' + queue.length + ' 处改动');
+  if (apiState === 'ok') return setPill('ok', '已同步 · ' + hm(new Date(lastPull)));
+  if (apiState === 'off') return setPill('off', cache ? '连不上表格 · 显示上次数据' : '连不上表格');
+  setPill('busy', '读取中…');
+}
+
+function pull() {
+  setPill('busy', '读取中…');
+  return fetch(API_URL + '?view=houses&t=' + Date.now(), { redirect: 'follow' })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (!j || !Array.isArray(j.houses)) {
+        var e = new Error(j && j.ok && j.data ? 'NO_ROUTE' : (j && j.error) || '接口返回格式不对');
+        throw e;
+      }
+      cache = { houses: j.houses, at: j.at }; save(K_CACHE, cache);
+      apiState = 'ok'; apiError = ''; lastPull = Date.now();
+      rebuild(); renderBanner();
+      if (queue.length) flush(); else pillIdle();
+    })
+    .catch(function (err) {
+      apiState = 'off'; apiError = String(err && err.message || err);
+      renderBanner(); pillIdle();
+      if (!cache) rebuild();
+    });
+}
+
+var flushing = false;
+function enqueue(op) {
+  queue.push(op); save(K_QUEUE, queue);
+  rebuild(); pillIdle();
+  clearTimeout(enqueue.t); enqueue.t = setTimeout(flush, 250);
+}
+function flush() {
+  if (flushing || !queue.length) return;
+  flushing = true;
+  var sending = queue.slice();
+  setPill('busy', '写入表格中…');
+  fetch(API_URL, {
+    method: 'POST', redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ view: 'houses', ops: sending })
+  })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (!j || !Array.isArray(j.houses)) throw new Error((j && j.error) || '接口还没开通写入');
+      // 服务器已处理这批（包括它拒绝的），从队列里拿掉
+      queue = queue.slice(sending.length); save(K_QUEUE, queue);
+      cache = { houses: j.houses, at: j.at }; save(K_CACHE, cache);
+      apiState = 'ok'; lastPull = Date.now();
+      rebuild();
+      if (j.ok === false && j.error) toast('有改动没写进去：' + j.error, true);
+      else toast('已写入表格');
+      if (drawerOpen && drawerMode === 'edit') refreshDrawerMsg();
+    })
+    .catch(function (err) {
+      apiState = 'off'; apiError = String(err && err.message || err);
+      toast('没连上表格，改动先存在这台设备上，稍后自动重试', true);
+      setTimeout(flush, 15000);
+    })
+    .then(function () { flushing = false; pillIdle(); });
+}
+
+function renderBanner() {
+  var b = $('#banner');
+  if (apiState === 'off' && apiError === 'NO_ROUTE') {
+    b.innerHTML = '<div class="banner">Apps Script 还是旧版本，没有看房接口。请在 Timeline_API 里加上 <code>Houses.gs</code> 并部署新版本。</div>';
+  } else if (apiState === 'off' && !cache) {
+    b.innerHTML = '<div class="banner">暂时连不上表格（' + esc(apiError) + '）。检查网络后点「刷新」。</div>';
+  } else b.innerHTML = '';
+}
+
+/* 浏览器端补坐标：接口没给、也不在旧坐标表里的地址，用 OpenStreetMap 查一次 */
+var geoBusy = false;
+function geocodeMissing() {
+  if (geoBusy) return;
+  var todo = houses.filter(function (h) { return h.approx && !geoCache[h.k] && !(h.geo === 'approx'); });
+  if (!todo.length) return;
+  geoBusy = true;
+  var i = 0;
+  (function next() {
+    if (i >= todo.length) { geoBusy = false; save(K_GEO, geoCache); rebuild(); return; }
+    var h = todo[i++];
+    var q = h.street + ', ' + (h.city || 'San Jose') + ', CA ' + h.zip;
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (a) {
+        if (a && a[0]) geoCache[h.k] = { lat: +(+a[0].lat).toFixed(6), lng: +(+a[0].lon).toFixed(6) };
+        else geoCache[h.k] = { miss: Date.now() };
+      })
+      .catch(function () {})
+      .then(function () { setTimeout(next, 1100); });
+  })();
+}
+
+/* ================= 筛选 / 排序 ================= */
+function visible() {
+  var q = filt.q.trim().toLowerCase();
+  return houses.filter(function (h) {
+    if (!filt.st[h.st]) return false;
+    if (filt.oh && !h.slots.length && !h.ohBad.length) return false;
+    if (filt.region && h.region !== filt.region) return false;
+    if (q && (h.addr + ' ' + h.pros + ' ' + h.cons + ' ' + h.oh + ' ' + h.status).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+}
+function sortList(list, how) {
+  var by = {
+    'price-asc': function (a, b) { return (a.priceN == null) - (b.priceN == null) || a.priceN - b.priceN; },
+    'price-desc': function (a, b) { return (a.priceN == null) - (b.priceN == null) || b.priceN - a.priceN; },
+    'status': function (a, b) { return STATUS[a.st].rank - STATUS[b.st].rank || a.idx - b.idx; },
+    'sheet': function (a, b) { return a.idx - b.idx; },
+    'region': function (a, b) {
+      var ra = G.REGION_ORDER.indexOf(a.region), rb = G.REGION_ORDER.indexOf(b.region);
+      if (ra < 0) ra = 99; if (rb < 0) rb = 99;
+      return ra - rb || STATUS[a.st].rank - STATUS[b.st].rank || a.idx - b.idx;
+    }
+  };
+  if (/^d-/.test(how)) {
+    var id = how.slice(2);
+    return list.sort(function (a, b) { return (a.d[id] == null) - (b.d[id] == null) || a.d[id] - b.d[id]; });
+  }
+  return list.sort(by[how] || by.region);
+}
+
+/* ================= 渲染：统计条 + 筛选 ================= */
+function median(a) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
+
+function renderStats() {
+  var by = { onsale: [], pending: [], sold: [], unknown: [] };
+  houses.forEach(function (h) { by[h.st].push(h); });
+  var onP = by.onsale.map(function (h) { return h.priceN; }).filter(function (x) { return x; });
+  var deltas = by.sold.map(function (h) { return h.delta; }).filter(function (x) { return x != null; });
+  var wk = houses.filter(function (h) { return h.st !== 'sold' && h.slots.some(function (s) { return s.day === 6 || s.day === 0; }); });
+  var only = ST_ORDER.filter(function (k) { return filt.st[k]; });
+  var solo = only.length === 1 ? only[0] : null;
+  var cell = function (k, label, v, d, extra) {
+    var on = (k === 'oh' ? filt.oh : solo === k);
+    return '<button class="stat' + (on ? ' on' : '') + '" data-stat="' + k + '" type="button">' +
+      '<span class="k">' + (STATUS[k] ? '<i style="background:' + STATUS[k].color + '"></i>' : '') + label + '</span>' +
+      '<span class="v">' + v + '</span><span class="d">' + d + '</span></button>';
+  };
+  var avgD = deltas.length ? deltas.reduce(function (a, b) { return a + b; }, 0) / deltas.length : null;
+  $('#stats').innerHTML =
+    cell('onsale', 'On Sale', by.onsale.length, onP.length ? '挂牌中位 ' + fmtP(median(onP)) : '—') +
+    cell('pending', 'Pending', by.pending.length, '已签约，等成交') +
+    cell('sold', 'Sold', by.sold.length, avgD != null ? '成交比挂牌 ' + (avgD >= 0 ? '+' : '−') + Math.abs(Math.round(avgD * 100)) + '%（' + deltas.length + ' 处）' : '成交价待补') +
+    cell('unknown', '未标状态', by.unknown.length, by.unknown.length ? '点开补状态' : '都标好了') +
+    cell('oh', '⚑ 周末 Open House', wk.length, '周六 ' + mdy(nextDate(6)) + ' · 周日 ' + mdy(nextDate(0)));
+}
+
+function renderFilters() {
+  var cnt = { onsale: 0, pending: 0, sold: 0, unknown: 0 };
+  houses.forEach(function (h) { cnt[h.st]++; });
+  $('#stchips').innerHTML = ST_ORDER.map(function (k) {
+    return '<button class="chip ' + (filt.st[k] ? 'on' : 'off') + '" data-st="' + k + '" type="button" aria-pressed="' + !!filt.st[k] + '">' +
+      '<i style="background:' + STATUS[k].color + '"></i>' + STATUS[k].label + ' <b>' + cnt[k] + '</b></button>';
+  }).join('');
+  var ohb = $('#ohOnly'); ohb.classList.toggle('on', filt.oh); ohb.setAttribute('aria-pressed', filt.oh);
+  var regs = {}; houses.forEach(function (h) { regs[h.region] = (regs[h.region] || 0) + 1; });
+  var names = Object.keys(regs).sort(function (a, b) {
+    var ia = G.REGION_ORDER.indexOf(a), ib = G.REGION_ORDER.indexOf(b); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+  if (filt.region && !regs[filt.region]) filt.region = '';
+  $('#region').innerHTML = '<option value="">全部区域</option>' + names.map(function (n) {
+    return '<option value="' + esc(n) + '"' + (n === filt.region ? ' selected' : '') + '>' + esc(n) + '（' + regs[n] + '）</option>';
+  }).join('');
+  $('#sort').value = filt.sort;
+  $('#sort').hidden = view !== 'map';
+}
+
+/* ================= 渲染：列表 ================= */
+function factChips(h, withOH) {
+  var c = [];
+  if (h.pending) c.push('<span class="fact pend">待写入表格</span>');
+  if (withOH) h.slots.forEach(function (s) { c.push('<span class="fact oh">⚑ ' + DAY_ZH[s.day] + ' ' + slotLabel(s) + '</span>'); });
+  if (withOH) h.ohBad.forEach(function (s) { c.push('<span class="fact oh">⚑ ' + esc(s) + '</span>'); });
+  if (h.f.bd) c.push('<span class="fact">' + h.f.bd + '卧 ' + h.f.ba + '卫</span>');
+  if (h.f.sqft) c.push('<span class="fact">室内 ' + fmtN(h.f.sqft) + ' sqft</span>');
+  if (h.f.lot) c.push('<span class="fact">地 ' + fmtN(h.f.lot) + ' sqft</span>');
+  if (h.f.year) c.push('<span class="fact">' + h.f.year + ' 年</span>');
+  if (h.ppsf) c.push('<span class="fact">$' + h.ppsf + '/sqft</span>');
+  if (h.approx) c.push('<span class="fact approx">位置估算</span>');
+  return c.length ? '<div class="facts">' + c.join('') + '</div>' : '';
+}
+function deltaHTML(h) {
+  if (h.delta == null) return '';
+  var p = Math.round(h.delta * 100);
+  return ' <span class="delta ' + (p > 0 ? 'up' : 'down') + '">' + (p > 0 ? '+' : '−') + Math.abs(p) + '%</span>';
+}
+function distHTML(h) {
+  if (h.lat == null) return '';
+  var near = null, best = 1e9;
+  G.LANDMARKS.forEach(function (lm) { if (h.d[lm.id] < best) { best = h.d[lm.id]; near = lm.id; } });
+  return '<div class="dist">' + G.LANDMARKS.map(function (lm) {
+    return '<span class="' + (lm.id === near ? 'near' : '') + '">' + lm.short + ' <b>' + h.d[lm.id].toFixed(1) + '</b></span>';
+  }).join('') + '<span>英里（直线）</span></div>';
+}
+function cardHTML(h) {
+  var pc = '';
+  if (h.pros) pc += '<span class="m pro">+</span><span>' + esc(h.pros) + '</span>';
+  if (h.cons) pc += '<span class="m con">−</span><span>' + esc(h.cons) + '</span>';
+  if (!pc) pc = '<span></span><span class="empty">还没记优缺点</span>';
+  return '<article class="card' + (h.k === selKey ? ' sel' : '') + '" data-k="' + esc(h.k) + '" tabindex="0" style="--st:' + STATUS[h.st].color + '">' +
+    '<div class="c-top"><h3>' + esc(h.street) + '</h3>' +
+    (h.priceN ? '<span class="c-price">' + fmtP(h.priceN) + '</span>' : '<span class="c-price none">未记价格</span>') + '</div>' +
+    '<div class="c-sub"><span class="st">' + esc(h.stLabel) + '</span><span>' + esc([h.city, h.zip].filter(Boolean).join(' ')) + '</span>' +
+    (h.soldN ? '<span class="soldv">成交 ' + fmtP(h.soldN) + deltaHTML(h) + '</span>' : '') + '</div>' +
+    factChips(h, true) +
+    '<div class="pc">' + pc + '</div>' + distHTML(h) + '</article>';
+}
+function renderList() {
+  var list = sortList(visible(), filt.sort);
+  $('#count').textContent = list.length === houses.length ? '共 ' + houses.length + ' 处' : list.length + ' / ' + houses.length + ' 处';
+  if (!houses.length) { $('#list').innerHTML = '<div class="emptylist">' + (apiState === 'off' ? '没读到数据' : '读取表格中…') + '</div>'; return; }
+  if (!list.length) { $('#list').innerHTML = '<div class="emptylist">没有符合筛选的房源</div>'; return; }
+  var html = '', lastG = null;
+  list.forEach(function (h) {
+    var g = filt.sort === 'region' ? h.region : filt.sort === 'status' ? STATUS[h.st].label : null;
+    if (g !== null && g !== lastG) { html += '<div class="group">' + esc(g) + '</div>'; lastG = g; }
+    html += cardHTML(h);
+  });
+  $('#list').innerHTML = html;
+}
+
+/* ================= 地图 ================= */
+var svg = $('#map');
+var NS = 'http://www.w3.org/2000/svg';
+var MW = G.MW, MH = G.MH;
+function px(lng) { return (lng - G.LNG0) / (G.LNG1 - G.LNG0) * MW; }
+function py(lat) { return (G.LAT0 - lat) / (G.LAT0 - G.LAT1) * MH; }
+var UPM = MW / ((G.LNG1 - G.LNG0) * 69.17 * Math.cos(37.37 * Math.PI / 180));   // 每英里多少地图单位
+function el(t, a) { var n = document.createElementNS(NS, t); for (var k in a) n.setAttribute(k, a[k]); return n; }
+function decRing(s) {
+  var i = 0, x = 0, y = 0, out = [];
+  while (i < s.length) {
+    var r = 0, sh = 0, b;
+    do { b = s.charCodeAt(i++) - 63; r |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
+    x += (r & 1) ? ~(r >> 1) : (r >> 1);
+    r = 0; sh = 0;
+    do { b = s.charCodeAt(i++) - 63; r |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
+    y += (r & 1) ? ~(r >> 1) : (r >> 1);
+    out.push((x / 10).toFixed(1) + ',' + (y / 10).toFixed(1));
+  }
+  return 'M' + out.join(' ') + 'Z';
+}
+var LAND_D = G.G_.land.map(decRing).join('');
+var ZIPS = G.G_.zips.map(function (o) { return { z: o.z, d: o.r.map(decRing).join(''), c: o.c }; });
+
+var V = { x: 0, y: 0, w: MW, h: MH };
+var ringOn = load('houses:rings', {});
+function upp() { var r = svg.getBoundingClientRect(); return r.width ? V.w / r.width : 1; }
+function fitAspect() {
+  var r = svg.getBoundingClientRect(); if (!r.width || !r.height) return;
+  var cx = V.x + V.w / 2, cy = V.y + V.h / 2;
+  V.h = V.w * r.height / r.width; V.x = cx - V.w / 2; V.y = cy - V.h / 2;
+}
+function applyView() { svg.setAttribute('viewBox', V.x + ' ' + V.y + ' ' + V.w + ' ' + V.h); drawScaled(); }
+
+function drawStatic() {
+  $('#gLand').innerHTML = ''; $('#gLand').appendChild(el('path', { d: LAND_D, 'class': 'land' }));
+  var gh = $('#gHwy'); gh.innerHTML = '';
+  G.HWYS.forEach(function (h) {
+    gh.appendChild(el('path', { d: 'M' + h.pts.map(function (p) { return px(p[1]).toFixed(1) + ',' + py(p[0]).toFixed(1); }).join(' L'), 'class': 'hwy' + (h.major ? ' major' : '') }));
+  });
+}
+function drawZips() {
+  var used = {}; houses.forEach(function (h) { if (h.zip) used[h.zip] = 1; });
+  var g = $('#gZip'); g.innerHTML = '';
+  ZIPS.forEach(function (o) { g.appendChild(el('path', { d: o.d, 'class': 'zipb' + (used[o.z] ? ' has' : '') })); });
+}
+
+function drawScaled() {
+  var u = upp();
+  /* 高速路牌 + 地名 */
+  var gp = $('#gPlace'); gp.innerHTML = '';
+  G.HWYS.forEach(function (h) {
+    var x = px(h.tag[1]), y = py(h.tag[0]), w = (h.n.length * 6 + 8) * u, hh = 14 * u;
+    var g = el('g', { 'class': 'shield' });
+    g.appendChild(el('rect', { x: x - w / 2, y: y - hh / 2, width: w, height: hh, rx: 2 * u }));
+    var t = el('text', { x: x, y: y + 4 * u, 'text-anchor': 'middle', 'font-size': 11 * u }); t.textContent = h.n; g.appendChild(t);
+    gp.appendChild(g);
+  });
+  var bl = el('text', { x: px(G.BAYLABEL.lng), y: py(G.BAYLABEL.lat), 'class': 'bay', 'font-size': 13 * u, 'text-anchor': 'middle', transform: 'rotate(' + G.BAYLABEL.rot + ' ' + px(G.BAYLABEL.lng) + ' ' + py(G.BAYLABEL.lat) + ')' });
+  bl.textContent = G.BAYLABEL.n; gp.appendChild(bl);
+  G.TERRAIN.forEach(function (t) {
+    var x = px(t.lng), y = py(t.lat);
+    var n = el('text', { x: x, y: y, 'class': 'terrain', 'font-size': 12 * u, 'text-anchor': 'middle', transform: 'rotate(' + t.rot + ' ' + x + ' ' + y + ')' });
+    n.textContent = t.n; gp.appendChild(n);
+  });
+  var zoomed = V.w < 560;
+  G.CITIES.forEach(function (c) {
+    if (!c.major && V.w > 900 && ['Alviso', 'Cambrian', 'Almaden', 'Los Altos', 'Saratoga'].indexOf(c.n) >= 0) return;
+    var n = el('text', { x: px(c.lng), y: py(c.lat), 'class': 'city' + (c.major ? ' major' : ''), 'font-size': (c.major ? 15 : 11) * u, 'text-anchor': 'middle' });
+    n.textContent = c.n; gp.appendChild(n);
+  });
+  if (zoomed) {
+    var used = {}; houses.forEach(function (h) { used[h.zip] = 1; });
+    ZIPS.forEach(function (o) {
+      if (!o.c || !used[o.z]) return;
+      var t = el('text', { x: o.c[0], y: o.c[1], 'class': 'ziplab', 'font-size': 10.5 * u, 'text-anchor': 'middle' }); t.textContent = o.z; gp.appendChild(t);
+    });
+  }
+
+  /* 5 英里圈 */
+  var gr = $('#gRing'); gr.innerHTML = '';
+  G.LANDMARKS.forEach(function (lm) {
+    if (!ringOn[lm.id]) return;
+    var x = px(lm.lng), y = py(lm.lat), r = 5 * UPM;
+    gr.appendChild(el('circle', { cx: x, cy: y, r: r, 'class': 'ring' }));
+    var t = el('text', { x: x, y: y - r - 5 * u, 'class': 'ringlab', 'font-size': 11 * u, 'text-anchor': 'middle' }); t.textContent = lm.short + ' 5 英里'; gr.appendChild(t);
+  });
+
+  /* 地标 */
+  var gl = $('#gLm'); gl.innerHTML = '';
+  G.LANDMARKS.forEach(function (lm) {
+    var x = px(lm.lng), y = py(lm.lat), s = 7 * u;
+    var g = el('g', { 'class': 'lm' + (ringOn[lm.id] ? ' on' : ''), 'data-lm': lm.id, tabindex: 0, role: 'button', 'aria-label': lm.name + '：画 5 英里圈' });
+    g.appendChild(el('circle', { cx: x, cy: y, r: 14 * u, 'class': 'hit' }));
+    if (lm.glyph === 'plane') {
+      g.appendChild(el('path', { 'class': 'gly', d: 'M' + x + ',' + (y - s * 1.2) + ' L' + (x + s * .28) + ',' + (y - s * .2) + ' L' + (x + s * 1.2) + ',' + (y + s * .35) + ' L' + (x + s * 1.2) + ',' + (y + s * .6) + ' L' + (x + s * .28) + ',' + (y + s * .35) + ' L' + (x + s * .22) + ',' + (y + s * .9) + ' L' + (x + s * .5) + ',' + (y + s * 1.15) + ' L' + (x - s * .5) + ',' + (y + s * 1.15) + ' L' + (x - s * .22) + ',' + (y + s * .9) + ' L' + (x - s * .28) + ',' + (y + s * .35) + ' L' + (x - s * 1.2) + ',' + (y + s * .6) + ' L' + (x - s * 1.2) + ',' + (y + s * .35) + ' L' + (x - s * .28) + ',' + (y - s * .2) + 'Z' }));
+    } else {
+      g.appendChild(el('rect', { 'class': 'gly', x: x - s * .8, y: y - s * .8, width: s * 1.6, height: s * 1.6, transform: 'rotate(45 ' + x + ' ' + y + ')' }));
+    }
+    var t = el('text', { x: x, y: y - 12 * u, 'class': 'lmlab', 'font-size': 12.5 * u, 'text-anchor': 'middle' }); t.textContent = lm.short; g.appendChild(t);
+    gl.appendChild(g);
+  });
+
+  drawPins();
+}
+
+function drawPins() {
+  var u = upp();
+  var vis = {}; visible().forEach(function (h) { vis[h.k] = 1; });
+  var gp = $('#gPin'); gp.innerHTML = '';
+  var list = houses.filter(function (h) { return h.lat != null; })
+    .sort(function (a, b) { return (a.k === selKey) - (b.k === selKey) || STATUS[b.st].rank - STATUS[a.st].rank; });
+  list.forEach(function (h) {
+    var x = px(h.lng), y = py(h.lat), r = (h.k === selKey ? 8 : 6.2) * u;
+    var g = el('g', { 'class': 'pin' + (vis[h.k] ? '' : ' dim') + (h.approx ? ' approx' : '') + (h.k === hotKey ? ' hot' : ''), 'data-k': h.k, tabindex: vis[h.k] ? 0 : -1, role: 'button', 'aria-label': h.street + ' ' + h.stLabel });
+    if (h.slots.length || h.ohBad.length) {
+      g.appendChild(el('line', { x1: x + r * .35, y1: y - r * .6, x2: x + r * .35, y2: y - r - 11 * u, 'class': 'flagpole' }));
+      g.appendChild(el('path', { d: 'M' + (x + r * .35) + ',' + (y - r - 11 * u) + ' l' + 8 * u + ',' + 2.6 * u + ' l' + (-8 * u) + ',' + 2.6 * u + 'Z', 'class': 'flag' }));
+    }
+    if (h.k === selKey) g.appendChild(el('circle', { cx: x, cy: y, r: r + 5 * u, 'class': 'halo' }));
+    g.appendChild(el('circle', { cx: x, cy: y, r: r, 'class': 'dot', style: 'fill:' + STATUS[h.st].color }));
+    gp.appendChild(g);
+  });
+  drawLabels(u, vis);
+}
+
+/* 标签：选中/悬停的一定显示；放大后尽量都显示，互相不压 */
+function drawLabels(u, vis) {
+  var gl = $('#gLab'); gl.innerHTML = '';
+  var boxes = [];
+  var hit = function (b) { for (var i = 0; i < boxes.length; i++) { var c = boxes[i]; if (b.x < c.x + c.w && b.x + b.w > c.x && b.y < c.y + c.h && b.y + b.h > c.y) return true; } return false; };
+  G.LANDMARKS.forEach(function (lm) { var fs = 12.5 * u; boxes.push({ x: px(lm.lng) - 30 * u, y: py(lm.lat) - 26 * u, w: 60 * u, h: 18 * u }); });
+  var showAll = V.w < 430;
+  var cand = houses.filter(function (h) { return h.lat != null && (h.k === selKey || h.k === hotKey || (showAll && vis[h.k])); });
+  cand.sort(function (a, b) { return (b.k === selKey) - (a.k === selKey) || (b.k === hotKey) - (a.k === hotKey) || STATUS[a.st].rank - STATUS[b.st].rank; });
+  houses.forEach(function (h) { if (h.lat != null && vis[h.k]) boxes.push({ x: px(h.lng) - 6 * u, y: py(h.lat) - 6 * u, w: 12 * u, h: 12 * u, pin: h.k }); });
+  cand.forEach(function (h) {
+    var fs = (h.k === selKey ? 12.5 : 11.5) * u, txt = h.street.replace(/\s+(Avenue|Ave|Street|St|Drive|Dr|Lane|Ln|Way|Road|Rd|Court|Ct|Boulevard|Blvd)$/i, '');
+    if (h.k === selKey && h.priceN) txt += ' · ' + fmtP(h.priceN);
+    var w = txt.length * fs * .56, x = px(h.lng), y = py(h.lat);
+    var opts = [{ x: x + 10 * u, y: y - fs * .7, a: 'start' }, { x: x - 10 * u - w, y: y - fs * .7, a: 'start' }, { x: x - w / 2, y: y - fs - 12 * u, a: 'start' }, { x: x - w / 2, y: y + 10 * u, a: 'start' }];
+    var force = h.k === selKey || h.k === hotKey;
+    for (var i = 0; i < opts.length; i++) {
+      var b = { x: opts[i].x, y: opts[i].y, w: w, h: fs * 1.2 };
+      var others = boxes.filter(function (c) { return c.pin !== h.k; });
+      var clash = false; for (var j = 0; j < others.length; j++) { var c = others[j]; if (b.x < c.x + c.w && b.x + b.w > c.x && b.y < c.y + c.h && b.y + b.h > c.y) { clash = true; break; } }
+      if (!clash || (force && i === opts.length - 1)) {
+        if (clash && force) b = { x: opts[0].x, y: opts[0].y, w: w, h: fs * 1.2 };
+        boxes.push(b);
+        var t = el('text', { x: b.x, y: b.y + fs * .95, 'class': 'plab' + (h.k === selKey ? ' sel' : ''), 'font-size': fs }); t.textContent = txt; gl.appendChild(t);
+        break;
+      }
+    }
+  });
+}
+
+function fitHouses(list) {
+  list = (list || visible()).filter(function (h) { return h.lat != null; });
+  var r = svg.getBoundingClientRect(); if (!r.width) return;
+  if (!list.length) { V = { x: 0, y: 0, w: MW, h: MH }; fitAspect(); applyView(); return; }
+  var xs = list.map(function (h) { return px(h.lng); }), ys = list.map(function (h) { return py(h.lat); });
+  G.LANDMARKS.forEach(function (lm) { xs.push(px(lm.lng)); ys.push(py(lm.lat)); });
+  var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+  var pad = 36, w = Math.max(x1 - x0 + pad * 2, 140), h = Math.max(y1 - y0 + pad * 2, 110);
+  var asp = r.height / r.width;
+  if (h / w > asp) w = h / asp; else h = w * asp;
+  V = { x: (x0 + x1) / 2 - w / 2, y: (y0 + y1) / 2 - h / 2, w: w, h: h };
+  applyView();
+}
+function zoomAt(p, f) {
+  var nw = Math.max(45, Math.min(MW * 1.6, V.w * f)); f = nw / V.w;
+  V.x = p.x - (p.x - V.x) * f; V.y = p.y - (p.y - V.y) * f; V.w = nw; V.h *= f;
+  applyView();
+}
+function toMap(cx, cy) { var r = svg.getBoundingClientRect(); return { x: V.x + (cx - r.left) / r.width * V.w, y: V.y + (cy - r.top) / r.height * V.h }; }
+function centerOn(h) {
+  if (!h || h.lat == null) return;
+  var x = px(h.lng), y = py(h.lat), m = V.w * .12;
+  if (x < V.x + m || x > V.x + V.w - m || y < V.y + m || y > V.y + V.h - m) { V.x = x - V.w / 2; V.y = y - V.h / 2; applyView(); }
+}
+
+/* 拖拽、双指缩放、点选（不用 click 事件，避免拖完误选） */
+(function () {
+  var ptrs = {}, start = null, moved = false, downT = null, pinch = null;
+  svg.addEventListener('pointerdown', function (e) {
+    ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var ids = Object.keys(ptrs);
+    if (ids.length === 1) { start = { x: e.clientX, y: e.clientY, V: Object.assign({}, V) }; moved = false; downT = e.target; }
+    if (ids.length === 2) {
+      var a = ptrs[ids[0]], b = ptrs[ids[1]];
+      pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), w: V.w, c: toMap((a.x + b.x) / 2, (a.y + b.y) / 2) }; moved = true;
+    }
+  });
+  svg.addEventListener('pointermove', function (e) {
+    if (!ptrs[e.pointerId]) {
+      var t = e.target.closest && e.target.closest('.pin'); var k = t ? t.getAttribute('data-k') : null;
+      if (k !== hotKey) { hotKey = k; drawPins(); markHot(); }
+      return;
+    }
+    ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var ids = Object.keys(ptrs);
+    if (ids.length === 2 && pinch) {
+      var a = ptrs[ids[0]], b = ptrs[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d > 0) zoomAt(pinch.c, (pinch.w * pinch.d / d) / V.w);
+      return;
+    }
+    if (!start) return;
+    var dx = e.clientX - start.x, dy = e.clientY - start.y;
+    if (!moved && Math.hypot(dx, dy) > 4) { moved = true; svg.classList.add('drag'); try { svg.setPointerCapture(e.pointerId); } catch (x) {} }
+    if (moved) {
+      var r = svg.getBoundingClientRect();
+      V.x = start.V.x - dx * V.w / r.width; V.y = start.V.y - dy * V.h / r.height; applyView();
+    }
+  });
+  function end(e) {
+    delete ptrs[e.pointerId];
+    if (Object.keys(ptrs).length < 2) pinch = null;
+    if (Object.keys(ptrs).length) return;
+    svg.classList.remove('drag');
+    if (!moved && downT && e.type === 'pointerup') {
+      var pin = downT.closest && downT.closest('.pin'), lm = downT.closest && downT.closest('.lm');
+      if (pin) select(pin.getAttribute('data-k'), { from: 'map' });
+      else if (lm) toggleRing(lm.getAttribute('data-lm'));
+    }
+    start = null; downT = null;
+  }
+  svg.addEventListener('pointerup', end);
+  svg.addEventListener('pointercancel', end);
+  svg.addEventListener('pointerleave', function () { if (hotKey && !start) { hotKey = null; drawPins(); markHot(); } });
+  svg.addEventListener('wheel', function (e) { e.preventDefault(); zoomAt(toMap(e.clientX, e.clientY), Math.exp(e.deltaY * (e.ctrlKey ? .01 : .0016))); }, { passive: false });
+  svg.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var pin = e.target.closest('.pin'), lm = e.target.closest('.lm');
+    if (pin) { e.preventDefault(); select(pin.getAttribute('data-k'), { from: 'map' }); }
+    if (lm) { e.preventDefault(); toggleRing(lm.getAttribute('data-lm')); }
+  });
+  $('#zin').onclick = function () { zoomAt({ x: V.x + V.w / 2, y: V.y + V.h / 2 }, 1 / 1.5); };
+  $('#zout').onclick = function () { zoomAt({ x: V.x + V.w / 2, y: V.y + V.h / 2 }, 1.5); };
+  $('#zfit').onclick = function () { fitHouses(); };
+  var ro = new ResizeObserver(function () { fitAspect(); applyView(); });
+  ro.observe(svg);
+})();
+function toggleRing(id) { ringOn[id] = !ringOn[id]; save('houses:rings', ringOn); drawScaled(); }
+function markHot() {
+  document.querySelectorAll('.card.hot').forEach(function (c) { c.classList.remove('hot'); });
+  if (hotKey) { var c = document.querySelector('.card[data-k="' + CSS.escape(hotKey) + '"]'); if (c) c.classList.add('hot'); }
+}
+
+/* ================= 周末看房 ================= */
+function renderOH() {
+  var box = $('#v-oh');
+  var list = visible().filter(function (h) { return h.st !== 'sold' && (h.slots.length || h.ohBad.length); });
+  var html = '<p class="ohnote">表格「Open House」列只写了星期几和时间，没有日期——下面默认按<strong>最近的这个周末</strong>排。过了周末记得在表格里清掉或换成新时间。已成交的不显示。</p>';
+  var days = {};
+  list.forEach(function (h) { h.slots.forEach(function (s) { (days[s.day] = days[s.day] || []).push({ h: h, s: s }); }); });
+  var order = [6, 0, 5, 1, 2, 3, 4].filter(function (d) { return days[d]; });
+  if (!order.length && !list.length) html += '<div class="ohempty">现在没有写了 Open House 时间的房源。在「地图」视图点开房源，填上「Open House」一栏（比如 <code>Sat 1-4pm</code>）。</div>';
+  order.forEach(function (d) {
+    var items = days[d].sort(function (a, b) { return a.s.s - b.s.s || a.s.e - b.s.e; });
+    var t0 = Math.min(10, Math.floor(Math.min.apply(null, items.map(function (i) { return i.s.s; }))));
+    var t1 = Math.max(17, Math.ceil(Math.max.apply(null, items.map(function (i) { return i.s.e; }))));
+    var span = t1 - t0, dt = nextDate(d);
+    var stops = items.filter(function (i) { return i.h.st === 'onsale' || i.h.st === 'unknown'; }).slice(0, 9)
+      .map(function (i) { return encodeURIComponent(i.h.addr); });
+    var route = stops.length >= 2 ? 'https://www.google.com/maps/dir/' + stops.join('/') : '';
+    html += '<section class="day"><div class="dayhead"><h2>' + DAY_ZH[d] + '</h2><span class="dd">' + (dt.getMonth() + 1) + '月' + dt.getDate() + '日 · ' + items.length + ' 处</span><span class="grow"></span>' +
+      (route ? '<a class="btn quiet" href="' + route + '" target="_blank" rel="noopener">按时间顺序在 Google 地图看路线 ↗</a>' : '') + '</div>';
+    html += '<div class="gantt" style="--hr:calc(100% / ' + span + ')"><div class="g-axis"><span></span><div class="ticks">';
+    for (var t = t0; t <= t1; t++) html += '<span class="' + ((t - t0) % 2 ? 'odd' : '') + '" style="left:' + ((t - t0) / span * 100) + '%">' + hLabel(t) + '</span>';
+    html += '</div></div>';
+    items.forEach(function (i) {
+      var h = i.h, l = (i.s.s - t0) / span * 100, w = (i.s.e - i.s.s) / span * 100;
+      html += '<div class="g-row" data-k="' + esc(h.k) + '" tabindex="0" style="--st:' + STATUS[h.st].color + '"><div class="g-lab"><strong>' + esc(h.street) + '</strong><small><span class="st">' + esc(h.stLabel) + '</span>' +
+        (h.priceN ? fmtP(h.priceN) : '') + (h.d.paypal != null ? ' · 离 PayPal ' + h.d.paypal.toFixed(1) + ' mi' : '') + '</small></div>' +
+        '<div class="g-track"><div class="g-bar ' + (h.st === 'pending' ? 'pending' : '') + '" style="left:' + l + '%;width:' + w + '%">' + slotLabel(i.s) + '</div></div></div>';
+    });
+    html += '</div></section>';
+  });
+  var bad = list.filter(function (h) { return h.ohBad.length; });
+  if (bad.length) {
+    html += '<section class="day"><div class="dayhead"><h2>时间没认出来</h2></div>' + bad.map(function (h) {
+      return '<div class="unparsed"><a href="#" data-k="' + esc(h.k) + '">' + esc(h.street) + '</a>：<code>' + esc(h.ohBad.join(' / ')) + '</code> —— 写成 <code>Sat 1-4pm</code> 这种格式就能排进日程</div>';
+    }).join('') + '</section>';
+  }
+  box.innerHTML = html;
+}
+
+/* ================= 对比表 ================= */
+var tsort = ui.tsort || { k: 'priceN', dir: 1 };
+var COLS = [
+  { k: 'street', t: '地址', cls: 'addr', v: function (h) { return h.street; }, h: function (h) { return esc(h.street) + '<small>' + esc([h.city, h.zip].filter(Boolean).join(' ')) + '</small>'; } },
+  { k: 'st', t: '状态', v: function (h) { return STATUS[h.st].rank; }, h: function (h) { return '<span class="st" style="--st:' + STATUS[h.st].color + '">' + esc(h.stLabel) + '</span>'; } },
+  { k: 'priceN', t: '挂牌', num: 1, v: function (h) { return h.priceN; }, h: function (h) { return h.priceN ? fmtP(h.priceN) : ''; }, best: 'min' },
+  { k: 'soldN', t: '成交', num: 1, v: function (h) { return h.soldN; }, h: function (h) { return h.soldN ? fmtP(h.soldN) : ''; } },
+  { k: 'delta', t: '差价', num: 1, v: function (h) { return h.delta; }, h: function (h) { return h.delta == null ? '' : deltaHTML(h); } },
+  { k: 'bd', t: '卧/卫', num: 1, v: function (h) { return h.f.bd; }, h: function (h) { return h.f.bd ? h.f.bd + ' / ' + h.f.ba : ''; } },
+  { k: 'sqft', t: '室内 sqft', num: 1, v: function (h) { return h.f.sqft; }, h: function (h) { return fmtN(h.f.sqft); }, best: 'max' },
+  { k: 'lot', t: '地 sqft', num: 1, v: function (h) { return h.f.lot; }, h: function (h) { return fmtN(h.f.lot); }, best: 'max' },
+  { k: 'year', t: '年份', num: 1, v: function (h) { return h.f.year; }, h: function (h) { return h.f.year || ''; } },
+  { k: 'ppsf', t: '$/sqft', num: 1, v: function (h) { return h.ppsf; }, h: function (h) { return h.ppsf ? '$' + h.ppsf : ''; }, best: 'min' }
+].concat(G.LANDMARKS.map(function (lm) {
+  return { k: 'd-' + lm.id, t: lm.short + ' mi', num: 1, v: function (h) { return h.d[lm.id]; }, h: function (h) { return h.d[lm.id] == null ? '' : h.d[lm.id].toFixed(1); }, best: 'min' };
+})).concat([
+  { k: 'oh', t: 'Open House', v: function (h) { return h.oh; }, h: function (h) { return esc(h.oh); } },
+  { k: 'pros', t: '优点', cls: 'txt', v: function (h) { return h.pros; }, h: function (h) { return esc(h.pros); } },
+  { k: 'cons', t: '硬伤', cls: 'txt', v: function (h) { return h.cons; }, h: function (h) { return esc(h.cons); } }
+]);
+function renderTable() {
+  var list = visible();
+  var col = COLS.filter(function (c) { return c.k === tsort.k; })[0] || COLS[2];
+  list.sort(function (a, b) {
+    var x = col.v(a), y = col.v(b);
+    var ex = x == null || x === '', ey = y == null || y === '';
+    if (ex || ey) return ex - ey;
+    return (typeof x === 'string' ? x.localeCompare(y) : x - y) * tsort.dir;
+  });
+  var bests = {};
+  COLS.forEach(function (c) {
+    if (!c.best) return;
+    var vals = list.filter(function (h) { return h.st !== 'sold'; }).map(c.v).filter(function (v) { return v != null && v !== ''; });
+    if (vals.length > 1) bests[c.k] = c.best === 'min' ? Math.min.apply(null, vals) : Math.max.apply(null, vals);
+  });
+  var head = '<thead><tr>' + COLS.map(function (c) {
+    return '<th class="' + (c.num ? 'num' : '') + '" data-col="' + c.k + '" scope="col">' + c.t + (c.k === tsort.k ? '<span class="ar">' + (tsort.dir > 0 ? '▲' : '▼') + '</span>' : '') + '</th>';
+  }).join('') + '</tr></thead>';
+  var body = '<tbody>' + list.map(function (h) {
+    return '<tr data-k="' + esc(h.k) + '" tabindex="0">' + COLS.map(function (c) {
+      var v = c.v(h), cls = [c.cls, c.num ? 'num' : '', (bests[c.k] != null && v === bests[c.k] && h.st !== 'sold') ? 'best' : '', h.st === 'sold' && c.num ? 'dim' : ''].filter(Boolean).join(' ');
+      return '<td' + (cls ? ' class="' + cls + '"' : '') + '>' + c.h(h) + '</td>';
+    }).join('') + '</tr>';
+  }).join('') + '</tbody>';
+  $('#cmp').innerHTML = head + body;
+}
+
+/* ================= 详情 / 编辑抽屉 ================= */
+var drawerOpen = false, drawerMode = 'edit', draft = null, orig = null;
+var FIELDS = ['addr', 'status', 'price', 'sold', 'oh', 'pros', 'cons'];
+
+function findH(k) { for (var i = 0; i < houses.length; i++) if (houses[i].k === k) return houses[i]; return null; }
+
+function select(k, opt) {
+  opt = opt || {};
+  selKey = k;
+  document.querySelectorAll('.card.sel').forEach(function (c) { c.classList.remove('sel'); });
+  var c = k && document.querySelector('.card[data-k="' + CSS.escape(k) + '"]');
+  if (c) { c.classList.add('sel'); if (opt.from === 'map' && window.innerWidth > 1060) c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  drawPins();
+  var h = findH(k);
+  if (h && opt.from !== 'map') centerOn(h);
+  if (h) openDrawer('edit', h);
+}
+
+function openDrawer(mode, h) {
+  drawerMode = mode;
+  orig = {}; FIELDS.forEach(function (f) { orig[f] = mode === 'edit' ? (h[f] || '') : ''; });
+  if (mode === 'add') orig.status = 'On Sale';
+  draft = Object.assign({}, orig);
+  if (mode === 'add') orig.status = '';
+  renderDrawer(h);
+  $('#drawer').classList.add('on'); $('#drawer').setAttribute('aria-hidden', 'false');
+  $('#scrim').classList.add('on');
+  drawerOpen = true;
+  setTimeout(function () { var f = mode === 'add' ? $('#f-addr') : $('#dClose'); if (f) f.focus(); }, 60);
+}
+function closeDrawer() {
+  if (drawerDirty() && !confirmLeave()) return;
+  $('#drawer').classList.remove('on'); $('#drawer').setAttribute('aria-hidden', 'true');
+  $('#scrim').classList.remove('on');
+  drawerOpen = false;
+  selKey = null; drawPins();
+  document.querySelectorAll('.card.sel').forEach(function (c) { c.classList.remove('sel'); });
+}
+function confirmLeave() {
+  // 不弹原生对话框：第一次关闭时提醒，再点一次才丢弃
+  if (closeDrawer.warned) { closeDrawer.warned = false; return true; }
+  closeDrawer.warned = true;
+  var m = $('#dMsg'); m.textContent = '有没保存的改动——再点一次关闭就放弃'; m.className = 'msg err';
+  setTimeout(function () { closeDrawer.warned = false; }, 4000);
+  return false;
+}
+function drawerDirty() { return draft && FIELDS.some(function (f) { return String(draft[f] || '').trim() !== String(orig[f] || '').trim(); }); }
+
+function renderDrawer(h) {
+  var add = drawerMode === 'add';
+  var st = stKey(draft.status);
+  $('#dSt').style.setProperty('--st', STATUS[st].color);
+  $('#dSt').textContent = add ? '新房源' : (h.stLabel);
+  $('#dTitle').textContent = add ? '记一处房源' : h.street;
+  $('#dLoc').textContent = add ? '会追加到 2026 tab 最后一行' : [h.city, h.zip, h.region].filter(Boolean).join(' · ') + (h.r ? ' · 表格第 ' + h.r + ' 行' : '');
+
+  var html = '';
+  if (!add) {
+    html += '<div class="d-sec"><div class="pricegrid"><div><small>挂牌</small><b>' + (h.priceN ? fmtP(h.priceN) : '—') + '</b></div>' +
+      '<div><small>成交</small><b>' + (h.soldN ? fmtP(h.soldN) : '—') + '</b></div>' +
+      '<div><small>' + (h.delta != null ? '成交 vs 挂牌' : '$/sqft') + '</small><b>' + (h.delta != null ? deltaHTML(h) : (h.ppsf ? '$' + h.ppsf : '—')) + '</b></div></div>' +
+      factChips(h, true) + '</div>';
+    if (h.lat != null) {
+      var mx = 12;
+      html += '<div class="d-sec"><h3>通勤（直线距离' + (h.approx ? '，位置是估算的' : '') + '）</h3><div class="distbars">' + G.LANDMARKS.map(function (lm) {
+        var d = h.d[lm.id];
+        var dir = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(h.addr) + '&destination=' + encodeURIComponent(lm.addr) + '&travelmode=driving';
+        return '<div class="db"><span>' + lm.name + '</span><span class="bar"><i style="width:' + Math.min(100, d / mx * 100) + '%"></i></span><span class="n">' + d.toFixed(1) + ' mi</span><a href="' + dir + '" target="_blank" rel="noopener">开车路线 ↗</a></div>' +
+          '';
+      }).join('') + '</div></div>';
+    }
+    var q = encodeURIComponent(h.addr);
+    html += '<div class="d-sec"><h3>外部链接</h3><div class="links">' +
+      '<a href="https://www.zillow.com/homes/' + encodeURIComponent(h.addr.replace(/,/g, '')).replace(/%20/g, '-') + '_rb/" target="_blank" rel="noopener">Zillow ↗</a>' +
+      '<a href="https://www.redfin.com/search#query=' + q + '" target="_blank" rel="noopener">Redfin ↗</a>' +
+      '<a href="https://www.google.com/maps/search/?api=1&query=' + q + '" target="_blank" rel="noopener">Google 地图 ↗</a>' +
+      (h.lat != null ? '<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + h.lat + ',' + h.lng + '" target="_blank" rel="noopener">街景 ↗</a>' : '') +
+      '<a href="https://www.google.com/search?q=' + encodeURIComponent(h.addr + ' flood zone') + '" target="_blank" rel="noopener">查洪水区 ↗</a>' +
+      '</div></div>';
+  }
+  html += '<div class="d-sec"><h3>' + (add ? '填写（只有地址必填）' : '记录 · 改完点「保存到表格」') + '</h3><div class="form">' +
+    fieldIn('addr', '地址', '完整地址，比如 123 Main St, San Jose, CA 95127', 'input') +
+    '<div class="f"><label>状态</label><div class="seg" id="seg">' + ST_ORDER.map(function (k) {
+      return '<button type="button" data-v="' + k + '" aria-pressed="' + (stKey(draft.status) === k) + '" style="--st:' + STATUS[k].color + '"><i></i>' + STATUS[k].label + '</button>';
+    }).join('') + '</div>' + (st === 'unknown' && draft.status ? '<div class="hint">表格里写的是「' + esc(draft.status) + '」</div>' : '') + '</div>' +
+    '<div class="two">' + fieldIn('price', '挂牌价', '如 1.2m、999k', 'input') + fieldIn('sold', '成交价', '成交后再填', 'input') + '</div>' +
+    fieldIn('oh', 'Open House', '如 Sat 1-4pm，两天用逗号隔开', 'input') +
+    fieldIn('pros', '优点', '如 3bd/2ba 1400 sqft；6000 sqft 地；1962 年建；安静 cul-de-sac', 'textarea') +
+    fieldIn('cons', '硬伤', '如 电线杆在门口、大马路边', 'textarea') +
+    '<div class="hint">卧卫、面积、地皮、年份写进「优点」里，按上面的格式写，列表和对比表会自动认出来。</div>' +
+    '</div></div>';
+  $('#dBody').innerHTML = html;
+  $('#dBody').scrollTop = 0;
+  refreshDrawerMsg();
+}
+function fieldIn(f, label, ph, kind) {
+  var v = esc(draft[f] || '');
+  return '<div class="f"><label for="f-' + f + '">' + label + '</label>' +
+    (kind === 'textarea' ? '<textarea id="f-' + f + '" data-f="' + f + '" placeholder="' + esc(ph) + '">' + v + '</textarea>'
+      : '<input id="f-' + f + '" data-f="' + f + '" value="' + v + '" placeholder="' + esc(ph) + '" autocomplete="off">') + '</div>';
+}
+function refreshDrawerMsg() {
+  var dirty = drawerDirty(), m = $('#dMsg');
+  var needAddr = drawerMode === 'add' && !String(draft.addr || '').trim();
+  $('#dSave').disabled = !dirty || needAddr;
+  $('#dCancel').hidden = !dirty;
+  m.className = 'msg';
+  if (needAddr && dirty) m.textContent = '先填地址';
+  else if (dirty) m.textContent = '有改动，还没保存';
+  else { var h = findH(selKey); m.textContent = h && h.pending ? '改动已记下，等写入表格…' : (drawerMode === 'add' ? '' : '和表格一致'); }
+}
+function saveDrawer() {
+  var fields = {};
+  FIELDS.forEach(function (f) { var a = String(draft[f] || '').trim(), b = String(orig[f] || '').trim(); if (a !== b) fields[f] = a; });
+  if (!Object.keys(fields).length) return;
+  if (drawerMode === 'add') {
+    var k = key(fields.addr);
+    if (findH(k)) { toast('表格里已经有这个地址了，已打开它', true); select(k); return; }
+    FIELDS.forEach(function (f) { if (fields[f] == null && draft[f]) fields[f] = draft[f]; });
+    enqueue({ type: 'add', fields: fields, at: Date.now() });
+    selKey = k;
+  } else {
+    enqueue({ type: 'update', addr: orig.addr, fields: fields, at: Date.now() });
+    if (fields.addr) selKey = key(fields.addr);
+  }
+  var h = findH(selKey);
+  if (h) { drawerMode = 'edit'; orig = {}; FIELDS.forEach(function (f) { orig[f] = h[f] || ''; }); draft = Object.assign({}, orig); renderDrawer(h); drawPins(); centerOn(h); }
+}
+
+$('#dBody').addEventListener('input', function (e) {
+  var f = e.target.getAttribute('data-f'); if (!f) return;
+  draft[f] = e.target.value; closeDrawer.warned = false; refreshDrawerMsg();
+});
+$('#dBody').addEventListener('click', function (e) {
+  var b = e.target.closest('#seg button'); if (!b) return;
+  var k = b.getAttribute('data-v');
+  draft.status = STATUS[k].write;
+  // 表格里原本就是这个状态（只是大小写不同）就保留原文
+  if (stKey(orig.status) === k && orig.status) draft.status = orig.status;
+  document.querySelectorAll('#seg button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+  $('#dSt').style.setProperty('--st', STATUS[k].color);
+  refreshDrawerMsg();
+});
+$('#dSave').onclick = saveDrawer;
+$('#dCancel').onclick = function () { draft = Object.assign({}, orig); var h = findH(selKey); renderDrawer(h || {}); };
+$('#dClose').onclick = closeDrawer;
+$('#scrim').onclick = closeDrawer;
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && drawerOpen) closeDrawer();
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && drawerOpen && !$('#dSave').disabled) saveDrawer();
+});
+
+/* ================= 事件 ================= */
+function renderAll() {
+  renderStats(); renderFilters();
+  if (view === 'map') { renderList(); drawZips(); drawPins(); }
+  if (view === 'oh') renderOH();
+  if (view === 'table') renderTable();
+  if (drawerOpen && drawerMode === 'edit' && !drawerDirty()) {
+    var h = findH(selKey);
+    if (h) { orig = {}; FIELDS.forEach(function (f) { orig[f] = h[f] || ''; }); draft = Object.assign({}, orig); renderDrawer(h); }
+  }
+}
+function setView(v) {
+  view = v; saveUI();
+  document.querySelectorAll('.views button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-view') === v); });
+  $('#v-map').hidden = v !== 'map'; $('#v-oh').hidden = v !== 'oh'; $('#v-table').hidden = v !== 'table';
+  renderAll();
+  if (v === 'map') { fitAspect(); applyView(); }
+}
+document.querySelector('.views').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) setView(b.getAttribute('data-view')); });
+
+$('#stats').addEventListener('click', function (e) {
+  var b = e.target.closest('.stat'); if (!b) return;
+  var k = b.getAttribute('data-stat');
+  if (k === 'oh') { setView('oh'); return; }
+  var only = ST_ORDER.filter(function (s) { return filt.st[s]; });
+  if (only.length === 1 && only[0] === k) ST_ORDER.forEach(function (s) { filt.st[s] = true; });
+  else ST_ORDER.forEach(function (s) { filt.st[s] = s === k; });
+  saveUI(); renderAll(); if (view === 'map') fitHouses();
+});
+$('#stchips').addEventListener('click', function (e) {
+  var b = e.target.closest('.chip'); if (!b) return;
+  var k = b.getAttribute('data-st'); filt.st[k] = !filt.st[k];
+  if (!ST_ORDER.some(function (s) { return filt.st[s]; })) ST_ORDER.forEach(function (s) { filt.st[s] = true; });
+  saveUI(); renderAll();
+});
+$('#ohOnly').onclick = function () { filt.oh = !filt.oh; saveUI(); renderAll(); };
+$('#region').onchange = function () { filt.region = this.value; saveUI(); renderAll(); if (view === 'map') fitHouses(); };
+$('#sort').onchange = function () { filt.sort = this.value; saveUI(); renderList(); };
+$('#q').addEventListener('input', function () { filt.q = this.value; renderAll(); });
+
+function openFrom(e) {
+  var t = e.target.closest('[data-k]'); if (!t || t.closest('svg')) return;
+  if (t.tagName === 'A') e.preventDefault();
+  select(t.getAttribute('data-k'));
+}
+['#list', '#v-oh', '#cmp'].forEach(function (s) {
+  var n = $(s);
+  n.addEventListener('click', function (e) {
+    var th = e.target.closest('th[data-col]');
+    if (th) { var k = th.getAttribute('data-col'); tsort = { k: k, dir: tsort.k === k ? -tsort.dir : 1 }; ui.tsort = tsort; save(K_UI, Object.assign(load(K_UI, {}), { tsort: tsort })); renderTable(); return; }
+    openFrom(e);
+  });
+  n.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.matches('[data-k]')) openFrom(e); });
+});
+$('#list').addEventListener('mouseover', function (e) {
+  var c = e.target.closest('.card'); var k = c ? c.getAttribute('data-k') : null;
+  if (k !== hotKey) { hotKey = k; drawPins(); }
+});
+$('#list').addEventListener('mouseleave', function () { hotKey = null; drawPins(); });
+
+$('#addBtn').onclick = function () { selKey = null; drawPins(); openDrawer('add', {}); };
+$('#refreshBtn').onclick = function () { pull(); };
+$('#sheetLink').href = SHEET_URL;
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'visible' && Date.now() - lastPull > 60000) pull();
+});
+window.addEventListener('online', function () { if (queue.length) flush(); else pull(); });
+
+var tt;
+function toast(msg, err) {
+  var t = $('#toast'); t.textContent = msg; t.className = 'toast on' + (err ? ' err' : '');
+  clearTimeout(tt); tt = setTimeout(function () { t.className = 'toast' + (err ? ' err' : ''); }, err ? 5200 : 2400);
+}
+
+/* ================= 启动 ================= */
+drawStatic();
+setView(view);
+rebuild();
+requestAnimationFrame(function () { fitAspect(); fitHouses(); });
+pillIdle();
+pull().then(function () { if (view === 'map') fitHouses(); });
+
+})();
+</script>
+</body>
+</html>

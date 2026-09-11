@@ -25,7 +25,7 @@
   --cond:"Barlow Condensed","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
 }
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:64px}
 body{
   margin:0;
   background:var(--paper);
@@ -222,7 +222,7 @@ footer p{margin:0 0 7px}
 /* 身份弹窗 */
 .modal{
   position:fixed;inset:0;background:rgba(30,35,40,.55);
-  display:none;align-items:center;justify-content:center;padding:24px;z-index:50;
+  display:none;align-items:center;justify-content:center;padding:24px;z-index:70;
 }
 .modal.on{display:flex}
 .modal-in{background:var(--paper);border:1px solid var(--ink);max-width:420px;width:100%;padding:28px}
@@ -271,9 +271,30 @@ footer p{margin:0 0 7px}
   .phase{page-break-inside:avoid}
   .item{page-break-inside:avoid}
 }
+
+/* ---------- 站点导航（和看房板共用） ---------- */
+.site{position:sticky;top:0;z-index:60;height:48px;display:flex;align-items:stretch;gap:2px;padding:0 20px;background:var(--ink);color:var(--paper);line-height:1.2}
+.site .brand{font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--paper);text-decoration:none;display:flex;align-items:center;margin-right:22px;white-space:nowrap}
+.site .brand i{display:inline-block;width:11px;height:11px;background:var(--paper);margin-right:9px;transform:translateY(-1px)}
+.site .tab{display:flex;align-items:center;padding:0 14px;color:#a9b0b6;text-decoration:none;font-family:var(--cond);font-weight:600;font-size:17px;letter-spacing:.02em;border-bottom:3px solid transparent;border-top:3px solid transparent;white-space:nowrap}
+.site .tab:hover{color:#fff}
+.site .tab[aria-current="page"]{color:#fff;border-bottom-color:#8fb3cc}
+.site .tab:focus-visible,.site .brand:focus-visible{outline:2px solid #8fb3cc;outline-offset:-2px}
+@media (max-width:640px){
+  .site{padding:0 12px}
+  .site .brand{margin-right:8px;font-size:13px;letter-spacing:.1em}
+  .site .brand span{display:none}
+  .site .tab{padding:0 10px;font-size:16px}
+}
+@media print{.site{display:none!important}}
 </style>
 </head>
 <body>
+<nav class="site" aria-label="站点">
+  <a class="brand" href="./"><i></i><span>The Black House</span></a>
+  <a class="tab" href="./" aria-current="page">购房时间表</a>
+  <a class="tab" href="houses.html">看房板</a>
+</nav>
 <div class="wrap">
 
 <header>
