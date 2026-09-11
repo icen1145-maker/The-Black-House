@@ -14,7 +14,7 @@
   --rule:#c9c5bd; --rule-2:#ded9d1;
   --blue:#1f5f8b; --blue-soft:#dde8ef;
   --flag:#9c3a22; --flag-soft:#f2e2dc; --done:#41714f; --done-soft:#e1ebe3;
-  --onsale:#3a7d52; --pending:#c08a1e; --sold:#a2412a; --unk:#8d949b;
+  --onsale:#3a7d52; --pending:#c08a1e; --sold:#a2412a; --unk:#8d949b; --fav:#b8324f;
   --water:#d3dde1; --land:#f8f6f1; --zip:#e2ddd3; --zipon:#ece6d9; --hwy:#cfc7b9; --hwy2:#bdb3a2;
   --mark:#1f5f8b;
   --sans:"Barlow","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
@@ -61,7 +61,7 @@ h1{font-family:var(--cond);font-size:clamp(38px,5.4vw,58px);line-height:1;font-w
 @keyframes blink{50%{opacity:.25}}
 
 /* 统计条：沿用时间表的方格纸样式 */
-.stats{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--ink);
+.stats{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--ink);
   background:repeating-linear-gradient(90deg,transparent 0 19px,var(--rule-2) 19px 20px),repeating-linear-gradient(0deg,transparent 0 19px,var(--rule-2) 19px 20px),var(--paper)}
 .stat{appearance:none;border:0;border-right:1px solid var(--rule);background:transparent;text-align:left;padding:12px 14px 11px;cursor:pointer;min-width:0}
 .stat:last-child{border-right:0}
@@ -69,7 +69,8 @@ h1{font-family:var(--cond);font-size:clamp(38px,5.4vw,58px);line-height:1;font-w
 .stat.on{background:var(--blue-soft);box-shadow:inset 0 -3px 0 var(--blue)}
 .stat .k{display:flex;align-items:center;gap:7px;font-family:var(--cond);font-weight:600;font-size:14px;color:var(--ink-2);line-height:1.1}
 .stat .k i{width:9px;height:9px;border-radius:50%;flex:none}
-.stat .v{display:block;font-family:var(--cond);font-weight:700;font-size:32px;line-height:1.05;margin-top:5px}
+.stat .v{display:block;font-family:var(--cond);font-weight:700;font-size:30px;line-height:1.05;margin-top:5px}
+.stat.fav .k{color:var(--fav)}
 .stat .d{display:block;font-size:12px;color:var(--ink-3);line-height:1.3;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ---------- 工具条 ---------- */
@@ -86,6 +87,23 @@ h1{font-family:var(--cond);font-size:clamp(38px,5.4vw,58px);line-height:1;font-w
 .chip.on{border-color:var(--ink);color:var(--ink);background:#fff}
 .chip.on b{color:var(--ink)}
 .chip.off{opacity:.55;text-decoration:line-through;text-decoration-color:var(--ink-3)}
+.chip.favchip.on{border-color:var(--fav);color:var(--fav)}
+.chip.favchip.on b{color:var(--fav)}
+
+/* 爱心 */
+.favbtn{appearance:none;border:0;background:transparent;padding:3px;margin:-3px -2px -3px 0;cursor:pointer;color:var(--ink-3);flex:none;border-radius:3px;line-height:0}
+.favbtn:hover{color:var(--fav);background:var(--paper-2)}
+.favbtn svg{width:19px;height:19px;display:block}
+.favbtn svg path{fill:currentColor;fill-opacity:0;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}
+.favbtn[aria-pressed="true"]{color:var(--fav)}
+.favbtn[aria-pressed="true"] svg path{fill-opacity:1}
+.favbtn.big svg{width:24px;height:24px}
+.d-head .favbtn{padding:5px;border:1px solid var(--rule);border-radius:2px}
+.d-head .favbtn[aria-pressed="true"]{border-color:var(--fav)}
+.cmp td.favcell{width:34px;padding-right:0}
+.favheart{fill:var(--fav);stroke:#fff;stroke-width:1.1;vector-effect:non-scaling-stroke;pointer-events:none}
+.card.isfav::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--fav);opacity:.55}
+.g-lab .fv{color:var(--fav)}
 .fsel,.search{border:1px solid var(--rule);background:var(--card);border-radius:2px;padding:5px 8px;font-size:13.5px;height:32px;max-width:100%}
 #region{max-width:240px}
 .search{width:200px}
@@ -275,7 +293,7 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
   .v-map{grid-template-columns:1fr}
   .mapcol{position:relative;top:0;height:56vh;min-height:320px;margin-bottom:18px}
   .stats{grid-template-columns:repeat(3,1fr)}
-  .stat:nth-child(3){border-right:0}
+  .stat:nth-child(3n){border-right:0}
   .stat:nth-child(n+4){border-top:1px solid var(--rule)}
 }
 @media (max-width:640px){
@@ -288,9 +306,8 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
   .stats{grid-template-columns:repeat(2,1fr)}
   .stat{border-top:1px solid var(--rule)}
   .stat:nth-child(-n+2){border-top:0}
-  .stat:nth-child(3){border-right:1px solid var(--rule)}
+  .stat:nth-child(3),.stat:nth-child(5){border-right:1px solid var(--rule)}
   .stat:nth-child(2n){border-right:0}
-  .stat:last-child{grid-column:1/-1}
   .stat .v{font-size:26px}
   .views{width:100%}
   .views button{flex:1;padding-inline:6px}
@@ -350,6 +367,7 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
     <input class="search" id="q" type="search" placeholder="搜地址 / 优缺点" aria-label="搜索">
     <select class="fsel" id="sort" aria-label="排序">
       <option value="region">按区域</option>
+      <option value="fav">收藏优先</option>
       <option value="status">按状态</option>
       <option value="price-asc">价格 低→高</option>
       <option value="price-desc">价格 高→低</option>
@@ -361,6 +379,7 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
   </div>
   <div class="tb-row filters" id="filters">
     <span id="stchips" style="display:contents"></span>
+    <button class="chip favchip" id="favOnly" type="button" aria-pressed="false">♥ 只看收藏</button>
     <button class="chip" id="ohOnly" type="button" aria-pressed="false">⚑ 只看有 Open House</button>
     <select class="fsel" id="region" aria-label="区域"></select>
   </div>
@@ -387,6 +406,7 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
           <span><i style="background:var(--sold)"></i>Sold</span>
           <span><i style="background:var(--unk)"></i>未标</span>
           <span>⚑ 有 open house</span>
+          <span><svg width="12" height="12" viewBox="0 0 24 24" style="display:block"><path d="M12 20.5 4.2 12.6a4.7 4.7 0 0 1 6.6-6.7l1.2 1.1 1.2-1.1a4.7 4.7 0 0 1 6.6 6.7Z" fill="#b8324f"/></svg>收藏</span>
           <span>虚线点＝位置估算</span>
         </div>
       </div>
@@ -415,6 +435,7 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
       <h2 id="dTitle"></h2>
       <div class="loc" id="dLoc"></div>
     </div>
+    <button class="favbtn big" id="dFav" type="button" aria-pressed="false" aria-label="收藏" title="收藏"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.2 12.6a4.7 4.7 0 0 1 6.6-6.7l1.2 1.1 1.2-1.1a4.7 4.7 0 0 1 6.6 6.7Z"/></svg></button>
     <button class="x" id="dClose" type="button" aria-label="关闭">×</button>
   </div>
   <div class="d-body" id="dBody"></div>
@@ -578,11 +599,11 @@ var selKey = null, hotKey = null;
 var view = ui.view || 'map';
 var filt = {
   st: ui.st || { onsale: true, pending: true, sold: true, unknown: true },
-  oh: !!ui.oh, region: ui.region || '', q: '', sort: ui.sort || 'region'
+  oh: !!ui.oh, fav: !!ui.fav, region: ui.region || '', q: '', sort: ui.sort || 'region'
 };
 var lastPull = 0, apiState = 'init', apiError = '', fitted = false;
 
-function saveUI() { save(K_UI, { view: view, st: filt.st, oh: filt.oh, region: filt.region, sort: filt.sort }); }
+function saveUI() { save(K_UI, { view: view, st: filt.st, oh: filt.oh, fav: filt.fav, region: filt.region, sort: filt.sort, tsort: tsort }); }
 
 /* 原始行 → 页面用的对象 */
 function enrich(raw, idx) {
@@ -590,7 +611,7 @@ function enrich(raw, idx) {
     r: raw.r || null, idx: idx,
     addr: raw.addr || '', cons: raw.cons || '', pros: raw.pros || '', price: raw.price || '',
     sold: raw.sold || '', status: raw.status || '', oh: raw.oh || '',
-    lat: raw.lat, lng: raw.lng, geo: raw.geo || ''
+    lat: raw.lat, lng: raw.lng, geo: raw.geo || '', fav: !!raw.fav
   };
   h.k = key(h.addr);
   var pa = parseAddr(h.addr);
@@ -640,6 +661,11 @@ function rebuild() {
 function applyQueueTo(rows) {
   queue.forEach(function (op) {
     var f = op.fields || {};
+    if (op.type === 'fav') {
+      var fk = key(op.addr);
+      for (var j = 0; j < rows.length; j++) if (key(rows[j].addr) === fk) rows[j].fav = !!op.on;
+      return;
+    }
     if (op.type === 'update') {
       var k = key(op.addr);
       for (var i = 0; i < rows.length; i++) if (key(rows[i].addr) === k) { Object.assign(rows[i], f); if (f.addr) { rows[i].lat = null; rows[i].lng = null; } return; }
@@ -759,6 +785,7 @@ function visible() {
   var q = filt.q.trim().toLowerCase();
   return houses.filter(function (h) {
     if (!filt.st[h.st]) return false;
+    if (filt.fav && !h.fav) return false;
     if (filt.oh && !h.slots.length && !h.ohBad.length) return false;
     if (filt.region && h.region !== filt.region) return false;
     if (q && (h.addr + ' ' + h.pros + ' ' + h.cons + ' ' + h.oh + ' ' + h.status).toLowerCase().indexOf(q) < 0) return false;
@@ -771,6 +798,7 @@ function sortList(list, how) {
     'price-desc': function (a, b) { return (a.priceN == null) - (b.priceN == null) || b.priceN - a.priceN; },
     'status': function (a, b) { return STATUS[a.st].rank - STATUS[b.st].rank || a.idx - b.idx; },
     'sheet': function (a, b) { return a.idx - b.idx; },
+    'fav': function (a, b) { return (b.fav ? 1 : 0) - (a.fav ? 1 : 0) || STATUS[a.st].rank - STATUS[b.st].rank || a.idx - b.idx; },
     'region': function (a, b) {
       var ra = G.REGION_ORDER.indexOf(a.region), rb = G.REGION_ORDER.indexOf(b.region);
       if (ra < 0) ra = 99; if (rb < 0) rb = 99;
@@ -785,6 +813,18 @@ function sortList(list, how) {
 }
 
 /* ================= 渲染：统计条 + 筛选 ================= */
+function favCount() { var n = 0; houses.forEach(function (h) { if (h.fav) n++; }); return n; }
+function favBtnHTML(h, cls) {
+  return '<button class="favbtn' + (cls ? ' ' + cls : '') + '" type="button" data-fav="' + esc(h.k) + '" aria-pressed="' + (h.fav ? 'true' : 'false') +
+    '" aria-label="' + (h.fav ? '取消收藏' : '收藏') + ' ' + esc(h.street || h.addr) + '" title="' + (h.fav ? '取消收藏' : '收藏') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.2 12.6a4.7 4.7 0 0 1 6.6-6.7l1.2 1.1 1.2-1.1a4.7 4.7 0 0 1 6.6 6.7Z"/></svg></button>';
+}
+function toggleFav(k) {
+  var h = findH(k); if (!h) return;
+  var on = !h.fav;
+  enqueue({ type: 'fav', addr: h.addr, on: on, at: Date.now() });
+  toast(on ? '♥ 已收藏 ' + h.street : '取消收藏 ' + h.street);
+}
+
 function median(a) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
 
 function renderStats() {
@@ -793,11 +833,12 @@ function renderStats() {
   var onP = by.onsale.map(function (h) { return h.priceN; }).filter(function (x) { return x; });
   var deltas = by.sold.map(function (h) { return h.delta; }).filter(function (x) { return x != null; });
   var wk = houses.filter(function (h) { return h.st !== 'sold' && h.slots.some(function (s) { return s.day === 6 || s.day === 0; }); });
+  var favs = houses.filter(function (h) { return h.fav; });
   var only = ST_ORDER.filter(function (k) { return filt.st[k]; });
   var solo = only.length === 1 ? only[0] : null;
-  var cell = function (k, label, v, d, extra) {
-    var on = (k === 'oh' ? filt.oh : solo === k);
-    return '<button class="stat' + (on ? ' on' : '') + '" data-stat="' + k + '" type="button">' +
+  var cell = function (k, label, v, d) {
+    var on = k === 'oh' ? false : k === 'fav' ? filt.fav : solo === k;
+    return '<button class="stat' + (on ? ' on' : '') + (k === 'fav' ? ' fav' : '') + '" data-stat="' + k + '" type="button">' +
       '<span class="k">' + (STATUS[k] ? '<i style="background:' + STATUS[k].color + '"></i>' : '') + label + '</span>' +
       '<span class="v">' + v + '</span><span class="d">' + d + '</span></button>';
   };
@@ -807,6 +848,7 @@ function renderStats() {
     cell('pending', 'Pending', by.pending.length, '已签约，等成交') +
     cell('sold', 'Sold', by.sold.length, avgD != null ? '成交比挂牌 ' + (avgD >= 0 ? '+' : '−') + Math.abs(Math.round(avgD * 100)) + '%（' + deltas.length + ' 处）' : '成交价待补') +
     cell('unknown', '未标状态', by.unknown.length, by.unknown.length ? '点开补状态' : '都标好了') +
+    cell('fav', '♥ 收藏', favs.length, favs.length ? '点一下只看收藏的' : '点卡片上的爱心来收藏') +
     cell('oh', '⚑ 周末 Open House', wk.length, '周六 ' + mdy(nextDate(6)) + ' · 周日 ' + mdy(nextDate(0)));
 }
 
@@ -818,6 +860,8 @@ function renderFilters() {
       '<i style="background:' + STATUS[k].color + '"></i>' + STATUS[k].label + ' <b>' + cnt[k] + '</b></button>';
   }).join('');
   var ohb = $('#ohOnly'); ohb.classList.toggle('on', filt.oh); ohb.setAttribute('aria-pressed', filt.oh);
+  var fvb = $('#favOnly'); fvb.classList.toggle('on', filt.fav); fvb.setAttribute('aria-pressed', filt.fav);
+  fvb.innerHTML = '♥ 只看收藏' + (favCount() ? ' <b>' + favCount() + '</b>' : '');
   var regs = {}; houses.forEach(function (h) { regs[h.region] = (regs[h.region] || 0) + 1; });
   var names = Object.keys(regs).sort(function (a, b) {
     var ia = G.REGION_ORDER.indexOf(a), ib = G.REGION_ORDER.indexOf(b); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
@@ -862,9 +906,10 @@ function cardHTML(h) {
   if (h.pros) pc += '<span class="m pro">+</span><span>' + esc(h.pros) + '</span>';
   if (h.cons) pc += '<span class="m con">−</span><span>' + esc(h.cons) + '</span>';
   if (!pc) pc = '<span></span><span class="empty">还没记优缺点</span>';
-  return '<article class="card' + (h.k === selKey ? ' sel' : '') + '" data-k="' + esc(h.k) + '" tabindex="0" style="--st:' + STATUS[h.st].color + '">' +
+  return '<article class="card' + (h.k === selKey ? ' sel' : '') + (h.fav ? ' isfav' : '') + '" data-k="' + esc(h.k) + '" tabindex="0" style="--st:' + STATUS[h.st].color + '">' +
     '<div class="c-top"><h3>' + esc(h.street) + '</h3>' +
-    (h.priceN ? '<span class="c-price">' + fmtP(h.priceN) + '</span>' : '<span class="c-price none">未记价格</span>') + '</div>' +
+    (h.priceN ? '<span class="c-price">' + fmtP(h.priceN) + '</span>' : '<span class="c-price none">未记价格</span>') +
+    favBtnHTML(h) + '</div>' +
     '<div class="c-sub"><span class="st">' + esc(h.stLabel) + '</span><span>' + esc([h.city, h.zip].filter(Boolean).join(' ')) + '</span>' +
     (h.soldN ? '<span class="soldv">成交 ' + fmtP(h.soldN) + deltaHTML(h) + '</span>' : '') + '</div>' +
     factChips(h, true) +
@@ -990,6 +1035,16 @@ function drawScaled() {
   drawPins();
 }
 
+/* 地图上的小爱心（s ≈ 高度） */
+function heartD(cx, cy, s) {
+  var a = s * 0.5;
+  return 'M' + cx + ',' + (cy + a * 0.78) +
+    'C' + (cx - a * 1.15) + ',' + (cy - a * 0.2) + ' ' + (cx - a) + ',' + (cy - a * 1.25) + ' ' + (cx - a * 0.42) + ',' + (cy - a * 1.25) +
+    'C' + (cx - a * 0.16) + ',' + (cy - a * 1.25) + ' ' + cx + ',' + (cy - a * 0.95) + ' ' + cx + ',' + (cy - a * 0.72) +
+    'C' + cx + ',' + (cy - a * 0.95) + ' ' + (cx + a * 0.16) + ',' + (cy - a * 1.25) + ' ' + (cx + a * 0.42) + ',' + (cy - a * 1.25) +
+    'C' + (cx + a) + ',' + (cy - a * 1.25) + ' ' + (cx + a * 1.15) + ',' + (cy - a * 0.2) + ' ' + cx + ',' + (cy + a * 0.78) + 'Z';
+}
+
 function drawPins() {
   var u = upp();
   var vis = {}; visible().forEach(function (h) { vis[h.k] = 1; });
@@ -1003,6 +1058,7 @@ function drawPins() {
       g.appendChild(el('line', { x1: x + r * .35, y1: y - r * .6, x2: x + r * .35, y2: y - r - 11 * u, 'class': 'flagpole' }));
       g.appendChild(el('path', { d: 'M' + (x + r * .35) + ',' + (y - r - 11 * u) + ' l' + 8 * u + ',' + 2.6 * u + ' l' + (-8 * u) + ',' + 2.6 * u + 'Z', 'class': 'flag' }));
     }
+    if (h.fav) g.appendChild(el('path', { d: heartD(x - r * 0.95, y - r * 1.05, 11 * u), 'class': 'favheart' }));
     if (h.k === selKey) g.appendChild(el('circle', { cx: x, cy: y, r: r + 5 * u, 'class': 'halo' }));
     g.appendChild(el('circle', { cx: x, cy: y, r: r, 'class': 'dot', style: 'fill:' + STATUS[h.st].color }));
     gp.appendChild(g);
@@ -1159,7 +1215,7 @@ function renderOH() {
     html += '</div></div>';
     items.forEach(function (i) {
       var h = i.h, l = (i.s.s - t0) / span * 100, w = (i.s.e - i.s.s) / span * 100;
-      html += '<div class="g-row" data-k="' + esc(h.k) + '" tabindex="0" style="--st:' + STATUS[h.st].color + '"><div class="g-lab"><strong>' + esc(h.street) + '</strong><small><span class="st">' + esc(h.stLabel) + '</span>' +
+      html += '<div class="g-row" data-k="' + esc(h.k) + '" tabindex="0" style="--st:' + STATUS[h.st].color + '"><div class="g-lab"><strong>' + (h.fav ? '<span class="fv">♥</span> ' : '') + esc(h.street) + '</strong><small><span class="st">' + esc(h.stLabel) + '</span>' +
         (h.priceN ? fmtP(h.priceN) : '') + (h.d.paypal != null ? ' · 离 PayPal ' + h.d.paypal.toFixed(1) + ' mi' : '') + '</small></div>' +
         '<div class="g-track"><div class="g-bar ' + (h.st === 'pending' ? 'pending' : '') + '" style="left:' + l + '%;width:' + w + '%">' + slotLabel(i.s) + '</div></div></div>';
     });
@@ -1177,6 +1233,7 @@ function renderOH() {
 /* ================= 对比表 ================= */
 var tsort = ui.tsort || { k: 'priceN', dir: 1 };
 var COLS = [
+  { k: 'fav', t: '♥', cls: 'favcell', v: function (h) { return h.fav ? 0 : 1; }, h: function (h) { return favBtnHTML(h); } },
   { k: 'street', t: '地址', cls: 'addr', v: function (h) { return h.street; }, h: function (h) { return esc(h.street) + '<small>' + esc([h.city, h.zip].filter(Boolean).join(' ')) + '</small>'; } },
   { k: 'st', t: '状态', v: function (h) { return STATUS[h.st].rank; }, h: function (h) { return '<span class="st" style="--st:' + STATUS[h.st].color + '">' + esc(h.stLabel) + '</span>'; } },
   { k: 'priceN', t: '挂牌', num: 1, v: function (h) { return h.priceN; }, h: function (h) { return h.priceN ? fmtP(h.priceN) : ''; }, best: 'min' },
@@ -1274,6 +1331,10 @@ function renderDrawer(h) {
   var st = stKey(draft.status);
   $('#dSt').style.setProperty('--st', STATUS[st].color);
   $('#dSt').textContent = add ? '新房源' : (h.stLabel);
+  var df = $('#dFav');
+  df.hidden = add;
+  df.setAttribute('aria-pressed', h && h.fav ? 'true' : 'false');
+  df.setAttribute('title', h && h.fav ? '取消收藏' : '收藏');
   $('#dTitle').textContent = add ? '记一处房源' : h.street;
   $('#dLoc').textContent = add ? '会追加到 2026 tab 最后一行' : [h.city, h.zip, h.region].filter(Boolean).join(' · ') + (h.r ? ' · 表格第 ' + h.r + ' 行' : '');
 
@@ -1364,6 +1425,7 @@ $('#dBody').addEventListener('click', function (e) {
   $('#dSt').style.setProperty('--st', STATUS[k].color);
   refreshDrawerMsg();
 });
+$('#dFav').onclick = function () { if (selKey) toggleFav(selKey); };
 $('#dSave').onclick = saveDrawer;
 $('#dCancel').onclick = function () { draft = Object.assign({}, orig); var h = findH(selKey); renderDrawer(h || {}); };
 $('#dClose').onclick = closeDrawer;
@@ -1398,6 +1460,7 @@ $('#stats').addEventListener('click', function (e) {
   var b = e.target.closest('.stat'); if (!b) return;
   var k = b.getAttribute('data-stat');
   if (k === 'oh') { setView('oh'); return; }
+  if (k === 'fav') { filt.fav = !filt.fav; saveUI(); renderAll(); if (view === 'map') fitHouses(); return; }
   var only = ST_ORDER.filter(function (s) { return filt.st[s]; });
   if (only.length === 1 && only[0] === k) ST_ORDER.forEach(function (s) { filt.st[s] = true; });
   else ST_ORDER.forEach(function (s) { filt.st[s] = s === k; });
@@ -1410,11 +1473,14 @@ $('#stchips').addEventListener('click', function (e) {
   saveUI(); renderAll();
 });
 $('#ohOnly').onclick = function () { filt.oh = !filt.oh; saveUI(); renderAll(); };
+$('#favOnly').onclick = function () { filt.fav = !filt.fav; saveUI(); renderAll(); };
 $('#region').onchange = function () { filt.region = this.value; saveUI(); renderAll(); if (view === 'map') fitHouses(); };
 $('#sort').onchange = function () { filt.sort = this.value; saveUI(); renderList(); };
 $('#q').addEventListener('input', function () { filt.q = this.value; renderAll(); });
 
 function openFrom(e) {
+  var fb = e.target.closest('[data-fav]');
+  if (fb) { e.preventDefault(); e.stopPropagation(); toggleFav(fb.getAttribute('data-fav')); return; }
   var t = e.target.closest('[data-k]'); if (!t || t.closest('svg')) return;
   if (t.tagName === 'A') e.preventDefault();
   select(t.getAttribute('data-k'));
@@ -1426,7 +1492,7 @@ function openFrom(e) {
     if (th) { var k = th.getAttribute('data-col'); tsort = { k: k, dir: tsort.k === k ? -tsort.dir : 1 }; ui.tsort = tsort; save(K_UI, Object.assign(load(K_UI, {}), { tsort: tsort })); renderTable(); return; }
     openFrom(e);
   });
-  n.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.matches('[data-k]')) openFrom(e); });
+  n.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.target.matches('[data-k]') || e.target.closest('[data-fav]'))) openFrom(e); });
 });
 $('#list').addEventListener('mouseover', function (e) {
   var c = e.target.closest('.card'); var k = c ? c.getAttribute('data-k') : null;
