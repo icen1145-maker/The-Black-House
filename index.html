@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>购房执行时间表 · 2026 秋</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f2f0ec;
+  --paper-2:#e7e4de;
+  --ink:#1e2328;
+  --ink-2:#4c545c;
+  --ink-3:#7d858d;
+  --rule:#c9c5bd;
+  --rule-2:#ded9d1;
+  --blue:#1f5f8b;
+  --blue-soft:#dde8ef;
+  --flag:#9c3a22;
+  --flag-soft:#f2e2dc;
+  --done:#41714f;
+  --sans:"Barlow","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --cond:"Barlow Condensed","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.75;
+  font-variant-numeric:tabular-nums;
+}
+.wrap{max-width:940px;margin:0 auto;padding:0 28px 120px}
+
+/* ---------- 顶部 ---------- */
+header{padding:64px 0 0}
+h1{
+  font-family:var(--cond);
+  font-size:clamp(38px,6.5vw,64px);
+  line-height:1.02;
+  font-weight:700;
+  letter-spacing:.01em;
+  margin:0 0 14px;
+}
+.sub{color:var(--ink-2);font-size:17px;max-width:60ch;margin:0 0 34px}
+
+/* 进度条：整个周期压缩成一条 */
+.strip{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  border:1px solid var(--ink);
+  background:
+    repeating-linear-gradient(90deg,transparent 0 19px,var(--rule-2) 19px 20px),
+    repeating-linear-gradient(0deg,transparent 0 19px,var(--rule-2) 19px 20px),
+    var(--paper);
+  margin-bottom:10px;
+}
+.strip a{
+  display:block;padding:13px 10px 12px;
+  text-decoration:none;color:var(--ink);
+  border-right:1px solid var(--rule);
+  transition:background .12s ease;
+}
+.strip a:last-child{border-right:0}
+.strip a:hover,.strip a:focus-visible{background:var(--blue-soft);outline:none}
+.strip a:focus-visible{box-shadow:inset 0 0 0 2px var(--blue)}
+.strip .n{font-family:var(--cond);font-weight:700;font-size:13px;color:var(--blue);display:block;line-height:1}
+.strip .t{font-family:var(--cond);font-weight:600;font-size:16px;display:block;margin-top:5px;line-height:1.2}
+.strip .d{font-size:11.5px;color:var(--ink-3);display:block;line-height:1.3;margin-top:3px}
+.stripfoot{display:none}
+#tally{color:var(--blue);font-weight:600}
+
+/* ---------- 阶段 ---------- */
+.phase{padding-top:58px}
+.phase-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:6px}
+.phase-num{
+  font-family:var(--cond);font-weight:700;font-size:15px;
+  color:var(--paper);background:var(--ink);
+  padding:1px 9px;flex:none;align-self:center;
+}
+.phase-head h2{font-family:var(--cond);font-size:31px;font-weight:700;margin:0;line-height:1.1;flex:1}
+.phase-date{font-size:14px;color:var(--ink-2);white-space:nowrap;font-weight:500}
+.phase-note{color:var(--ink-2);font-size:15.5px;margin:14px 0 0;max-width:62ch}
+
+/* ---------- 条目 ---------- */
+.item{
+  display:grid;grid-template-columns:26px 1fr;gap:0 16px;
+  padding:26px 0 24px;border-bottom:1px solid var(--rule-2);
+  align-items:start;
+}
+.item:last-child{border-bottom:0}
+.box{
+  appearance:none;-webkit-appearance:none;
+  width:19px;height:19px;margin:7px 0 0;
+  border:1.5px solid var(--ink-3);background:transparent;
+  cursor:pointer;flex:none;position:relative;border-radius:2px;
+  transition:border-color .12s ease,background .12s ease;
+}
+.box:hover{border-color:var(--ink)}
+.box:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.box:checked{background:var(--done);border-color:var(--done)}
+.box:checked::after{
+  content:"";position:absolute;left:5.5px;top:1.5px;
+  width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg);
+}
+.item h3{font-size:19px;font-weight:600;margin:0 0 2px;line-height:1.4}
+.item.done h3,.item.done .body{opacity:.42;text-decoration-color:var(--ink-3)}
+.item.done h3{text-decoration:line-through}
+.body{margin-top:9px}
+.body p{margin:0 0 11px}
+.body p:last-child{margin-bottom:0}
+.body ol,.body ul{margin:0 0 12px;padding-left:22px}
+.body li{margin-bottom:6px}
+.body li:last-child{margin-bottom:0}
+strong{font-weight:600}
+code{
+  font-family:var(--sans);font-weight:600;font-size:.95em;
+  background:var(--paper-2);padding:1px 5px;border-radius:2px;
+}
+
+/* 提示块 */
+.tip{border-left:3px solid var(--blue);background:var(--blue-soft);padding:12px 16px;margin:14px 0;font-size:15px}
+.warn{border-left:3px solid var(--flag);background:var(--flag-soft);padding:12px 16px;margin:14px 0;font-size:15px}
+.tip p:last-child,.warn p:last-child{margin-bottom:0}
+.warn strong{color:var(--flag)}
+
+/* 说话内容 */
+.quote{
+  border:1px dashed var(--rule);padding:14px 17px;margin:14px 0;
+  font-size:15px;color:var(--ink-2);background:rgba(255,255,255,.45);
+}
+
+/* 表格 */
+.tbl{width:100%;border-collapse:collapse;margin:16px 0;font-size:14.5px}
+.tbl th{
+  font-family:var(--cond);font-weight:600;font-size:16px;text-align:left;
+  padding:7px 12px 7px 0;border-bottom:1.5px solid var(--ink);vertical-align:bottom;
+}
+.tbl td{padding:11px 12px 11px 0;border-bottom:1px solid var(--rule-2);vertical-align:top;line-height:1.6}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td:first-child,.tbl th:first-child{padding-left:0}
+
+/* Day 轨 */
+.day{display:grid;grid-template-columns:76px 1fr;gap:0 20px;padding:22px 0;border-bottom:1px solid var(--rule-2)}
+.day:last-of-type{border-bottom:0}
+.day-n{
+  font-family:var(--cond);font-weight:700;font-size:19px;color:var(--blue);
+  line-height:1.3;padding-top:2px;border-right:1px solid var(--rule);padding-right:18px;
+}
+.day-n span{display:block;font-size:12.5px;color:var(--ink-3);font-weight:500;font-family:var(--sans)}
+.day h3{margin:0 0 8px;font-size:18px;font-weight:600}
+.rule-list{list-style:none;padding:0;margin:8px 0 0}
+.rule-list li{padding-left:26px;position:relative;margin-bottom:5px}
+.rule-list li::before{position:absolute;left:0;top:0;font-weight:700;font-size:15px}
+.rule-list li.no::before{content:"✕";color:var(--flag)}
+.rule-list li.yes::before{content:"✓";color:var(--done)}
+
+footer{margin-top:64px;padding-top:22px;border-top:2px solid var(--ink);font-size:13.5px;color:var(--ink-3)}
+footer p{margin:0 0 7px}
+
+.reset{
+  background:none;border:1px solid var(--rule);color:var(--ink-3);
+  font-family:var(--sans);font-size:12.5px;padding:3px 11px;border-radius:2px;cursor:pointer;
+}
+.reset:hover{border-color:var(--ink-3);color:var(--ink)}
+.reset:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+
+/* ---------- 同步 / 身份 / 备注 ---------- */
+.barrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3);padding-bottom:14px}
+.barrow .grow{flex:1}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--rule);border-radius:999px;padding:2px 12px;
+  font-size:12px;color:var(--ink-2);background:rgba(255,255,255,.5);
+}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink-3);flex:none}
+.pill.ok::before{background:var(--done)}
+.pill.busy::before{background:var(--blue)}
+.pill.off::before{background:var(--flag)}
+.whobtn{
+  background:none;border:1px solid var(--rule);border-radius:999px;
+  padding:2px 12px;font-family:var(--sans);font-size:12px;color:var(--ink-2);cursor:pointer;
+}
+.whobtn:hover{border-color:var(--ink-3);color:var(--ink)}
+.whobtn:focus-visible,.pill:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.meta{font-size:12.5px;color:var(--ink-3);margin-top:3px;display:none}
+.item.done .meta{display:block;opacity:1}
+.item.done .meta{text-decoration:none}
+
+.noteline{margin-top:12px}
+.notebtn{
+  background:none;border:0;padding:0;cursor:pointer;
+  font-family:var(--sans);font-size:13px;color:var(--blue);
+  border-bottom:1px solid transparent;
+}
+.notebtn:hover{border-bottom-color:var(--blue)}
+.notebtn:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.noteta{
+  display:none;width:100%;margin-top:8px;
+  font-family:var(--sans);font-size:14.5px;line-height:1.6;color:var(--ink);
+  background:rgba(255,255,255,.6);border:1px solid var(--rule);border-radius:3px;
+  padding:9px 11px;resize:vertical;min-height:64px;
+}
+.noteta:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.noteline.open .noteta{display:block}
+.noteview{
+  display:none;margin-top:8px;padding:9px 13px;
+  border-left:2px solid var(--rule);background:rgba(255,255,255,.45);
+  font-size:14.5px;color:var(--ink-2);white-space:pre-wrap;
+}
+.noteline.has .noteview{display:block}
+.noteline.open .noteview{display:none}
+.noteby{font-size:12px;color:var(--ink-3);margin-top:4px}
+
+/* 身份弹窗 */
+.modal{
+  position:fixed;inset:0;background:rgba(30,35,40,.55);
+  display:none;align-items:center;justify-content:center;padding:24px;z-index:50;
+}
+.modal.on{display:flex}
+.modal-in{background:var(--paper);border:1px solid var(--ink);max-width:420px;width:100%;padding:28px}
+.modal-in h2{font-family:var(--cond);font-size:26px;margin:0 0 8px;font-weight:700}
+.modal-in p{font-size:14.5px;color:var(--ink-2);margin:0 0 18px}
+.modal-in input{
+  width:100%;font-family:var(--sans);font-size:16px;padding:9px 12px;
+  border:1px solid var(--rule);border-radius:3px;background:#fff;color:var(--ink);
+}
+.modal-in input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.modal-in button{
+  margin-top:14px;width:100%;font-family:var(--cond);font-weight:600;font-size:17px;
+  background:var(--ink);color:var(--paper);border:0;padding:10px;cursor:pointer;border-radius:3px;
+}
+.modal-in button:hover{background:#000}
+
+@media(max-width:760px){
+  .wrap{padding:0 18px 80px}
+  header{padding-top:40px}
+  .strip{grid-template-columns:repeat(2,1fr)}
+  .strip a{border-bottom:1px solid var(--rule)}
+  .strip a:nth-child(2n){border-right:0}
+  .strip a:nth-last-child(-n+2){border-bottom:0}
+  .phase-head{flex-wrap:wrap;gap:6px 12px}
+  .phase-date{width:100%}
+  .day{grid-template-columns:1fr;gap:8px}
+  .day-n{border-right:0;border-bottom:1px solid var(--rule);padding:0 0 6px}
+  .day-n span{display:inline;margin-left:8px}
+  .tbl,.tbl tbody,.tbl tr,.tbl td{display:block;width:100%}
+  .tbl thead{display:none}
+  .tbl tr{border-bottom:1px solid var(--rule);padding:10px 0}
+  .tbl tr:last-child{border-bottom:0}
+  .tbl td{border:0;padding:2px 0}
+  .tbl td:first-child{font-weight:600}
+}
+@media(max-width:760px){
+  .barrow{gap:9px}
+  .modal-in{padding:22px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  body{background:#fff}
+  .strip,.reset,.notebtn,.whobtn,.pill,.modal{display:none!important}
+  .noteta{display:none!important}
+  .noteline.has .noteview{display:block!important}
+  .phase{page-break-inside:avoid}
+  .item{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>购房执行时间表</h1>
+  <p class="sub">San Jose 单家庭房 · 目标价 $1.2M · 夫妻共同申请 · 首付约 50%。<br>从卖股票到拿钥匙，按周排。勾选框会存在这台电脑的浏览器里。</p>
+
+  <nav class="strip">
+    <a href="#p0"><span class="n">阶段 0</span><span class="t">起步</span><span class="d">9/10–9/19</span></a>
+    <a href="#p1"><span class="n">阶段 1</span><span class="t">比价选贷</span><span class="d">9/21–9/26</span></a>
+    <a href="#p2"><span class="n">阶段 2</span><span class="t">预批签约</span><span class="d">9/28–10/10</span></a>
+    <a href="#p3"><span class="n">阶段 3</span><span class="t">看房出价</span><span class="d">10月中–11月</span></a>
+    <a href="#p4"><span class="n">阶段 4</span><span class="t">Escrow</span><span class="d">30 天</span></a>
+    <a href="#p5"><span class="n">阶段 5</span><span class="t">成交后</span><span class="d">30–60 天</span></a>
+  </nav>
+  <div class="barrow">
+    <span>已完成 <span id="tally">0 / 0</span></span>
+    <span class="pill" id="syncpill">未配置</span>
+    <button class="whobtn" id="whobtn">我是 …</button>
+    <span class="grow"></span>
+    <button class="reset" id="reset">清空全部勾选</button>
+  </div>
+  <div style="border-bottom:2px solid var(--ink);padding-bottom:38px"></div>
+</header>
+
+<!-- ============ 阶段 0 ============ -->
+<section class="phase" id="p0">
+  <div class="phase-head">
+    <span class="phase-num">0</span>
+    <h2>起步：资金、信用、材料</h2>
+    <span class="phase-date">9月10日 – 9月19日</span>
+  </div>
+  <p class="phase-note">这一周决定后面顺不顺。四件事并行推，没有先后。</p>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="sell-stock-b1">
+    <div>
+      <h3>第一批卖股：只卖出价要用的那部分</h3>
+      <div class="body">
+        <div class="tip"><p><strong>Pre-approval 不需要变现。</strong>券商对账单就是合格的资产证明——资产比所需资金高出 20% 以上时，可以按全额计入，不用提供卖出记录。所以现在只卖出价阶段真正要用到现金的部分，其余保留市场敞口，等抢到房再卖（见阶段 4 Day 1–5）。</p></div>
+        <ol>
+          <li>这一批卖 <strong>$50–60K</strong>：EMD 约 $36K + 验房费 $2–3K + 一点缓冲。</li>
+          <li>同一天内下单卖完。同一天算一次事件，文件好解释；跨天跨周才麻烦。</li>
+          <li>等 <code>T+1</code> 结算，资金可用后转进一个<strong>你确定能快速电汇的支票账户</strong>。</li>
+          <li><strong>转整笔，不留零头。</strong>留个零在券商会让金额对不上，要多解释一轮。</li>
+        </ol>
+        <div class="warn"><p><strong>EMD 必须在出价前就已经在银行里。</strong>offer 被接受后只有 3 个工作日要汇进 escrow，那时候再卖来不及。</p></div>
+        <p><strong>这里没有免费选项：</strong>不卖是在赌市场，卖了是在放弃可能的涨幅。分批只是把"市场风险"和"出价当天没钱打订金"这两个风险分开处理。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="test-wire-channel">
+    <div>
+      <h3>测试券商到银行的转账通道</h3>
+      <div class="body">
+        <p>第二批要在 escrow 期间赶时间卖出转账，通道必须提前验过。趁第一批卖出时一起测：</p>
+        <ul>
+          <li>关联银行账户有没有 <strong>3–5 天冷却期</strong>（新关联的账户常见）</li>
+          <li><strong>单日 / 单笔电汇限额</strong>够不够走大额</li>
+          <li>ACH 到账要几天，电汇当天能不能到</li>
+        </ul>
+        <div class="warn"><p>很多人是在出价当天才发现这两个卡点的。测一次只花几分钟。</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="no-account-merge">
+    <div>
+      <h3>多个账户不要归集</h3>
+      <div class="body">
+        <p><strong>银行接受多账户加总</strong>，你有五个账户就交五份对账单，underwriter 自己加。"整齐"对他们没有价值，<strong>完整</strong>才有。</p>
+        <div class="warn"><p><strong>归集反而添乱。</strong>每一笔账户间转账都会在对账单上留下一笔要解释的大额记录。把三个账户并成一个，就凭空制造了两笔要写说明、附凭证的转账——本来什么都不用做。</p></div>
+        <p>夫妻两人都申请，<strong>两人的账户都算共同资产，不需要互相转账</strong>。股票在谁名下就转进谁的银行账户。</p>
+        <p>唯一值得单独安排的是 <strong>EMD 那 $36K</strong>——金额小，就算产生一笔转账记录也好解释，放进一个能快速电汇的账户里备用。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="save-fund-docs">
+    <div>
+      <h3>当天存好三份资金证明</h3>
+      <div class="body">
+        <p>转账当天就下载存档，不要等银行来要：</p>
+        <ol>
+          <li><strong>券商最近两个月完整对账单</strong>——PDF，全部页数，含账户名 / 账号 / 机构名。不要用 App 截图。</li>
+          <li><strong>Trade confirmation</strong>（成交单）——卖了什么、什么时候、多少钱。</li>
+          <li><strong>转账记录</strong>——券商端转出 + 银行端转入，两边都要，金额日期能对上。</li>
+        </ol>
+        <div class="tip"><p>60 天沉淀不是硬门槛，是省事的捷径。<strong>只要凭证链完整，钱上周才到账也照样能用。</strong>所以真正的问题不是时间够不够长，是文件齐不齐。</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="pull-fico">
+    <div>
+      <h3>两人各拉一次房贷版信用分</h3>
+      <div class="body">
+        <p>去 <strong>myFICO.com</strong> 买一个月（约 $30–40），看完退订。它能显示房贷实际使用的 FICO 2/4/5 三局分数——这是唯一能提前自己看到的渠道。App 上那个分数不是这个。</p>
+        <div class="warn"><p><strong>重点看配偶那一份。</strong>双人申请时，定价按两人中间分里<strong>较低</strong>的那个走。如果明显低于 780，现在知道还有时间处理。</p></div>
+        <p>发现错误记录：登录对应信用局网站在线提交 dispute，附证明。法定 30 天回复。现在交，10 月中能出结果，刚好赶上。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="collect-docs">
+    <div>
+      <h3>建共享文件夹，收齐两人材料</h3>
+      <div class="body">
+        <p>一个文件夹，两个子文件夹，各放各的：</p>
+        <table class="tbl">
+          <thead><tr><th>文件</th><th>份数</th><th>去哪拿</th></tr></thead>
+          <tbody>
+            <tr><td>W-2</td><td>最近 2 年</td><td>公司 HR 系统</td></tr>
+            <tr><td>联邦报税表 1040（全套含附表）</td><td>最近 2 年</td><td>报税软件下载 PDF</td></tr>
+            <tr><td>Paystub</td><td>最近 30 天</td><td>公司薪资系统</td></tr>
+            <tr><td>银行对账单（全部账户）</td><td>最近 2 个月</td><td>银行网站正式 PDF</td></tr>
+            <tr><td>投资 / 退休账户对账单</td><td>最近 2 个月</td><td>券商、401k 平台</td></tr>
+            <tr><td>驾照</td><td>正反面</td><td></td></tr>
+            <tr><td>绿卡 / 护照 / 工卡（如适用）</td><td></td><td></td></tr>
+          </tbody>
+        </table>
+        <div class="warn"><p><strong>最常被打回的坑：</strong>下载时要选 Statements 里的正式 PDF，不是 Transaction history 导出。正式对账单每页都有银行 logo、账户名、页码（Page 1 of 6），缺页会被要求重交。</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="insurance-precheck">
+    <div>
+      <h3>保险预查（最容易被拖到最后，也最容易炸）</h3>
+      <div class="body">
+        <ol>
+          <li>找 2–3 家 <strong>independent agent</strong>（能比多家的独立经纪，不是单一公司的销售）。</li>
+          <li>把板子上几个主要候选地址发过去。</li>
+          <li>问三个问题：能不能拿到标准 HO-3 保单？拿不到的话 FAIR Plan + DIC 组合年费多少？有没有前提条件（屋顶年限、电箱、植被清理）？</li>
+        </ol>
+        <div class="warn"><p><strong>95127 那几处一定要问。</strong>靠东山，可能落在高火险区。一套拿不到保险的房子，再便宜也买不成——保险出不来，贷款就放不下来。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 阶段 1 ============ -->
+<section class="phase" id="p1">
+  <div class="phase-head">
+    <span class="phase-num">1</span>
+    <h2>比价选贷</h2>
+    <span class="phase-date">9月21日 – 9月26日</span>
+  </div>
+  <p class="phase-note">一周之内集中做完。拖成两三周，利率就没法横向比了。</p>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="lender-quotes">
+    <div>
+      <h3>约 4–5 家 lender，定在同一天报价</h3>
+      <div class="body">
+        <p>组合建议：1 家大行（有存款关系可能有折扣）、1 家 credit union（费用通常低）、1–2 家 mortgage broker（能横向比批发利率）、1 家线上（Better、Rocket 之类，用来压价）。</p>
+        <p>开场就把话说全，省掉三轮来回：</p>
+        <div class="quote">
+          我们是夫妻共同申请，目标房价 $1.2M，首付约 50%，自住单家庭房，Santa Clara County。想要一份 <strong>fully underwritten pre-approval</strong>，不是普通 pre-approval。请给我 30 年和 15 年两套 Loan Estimate，都按 <strong>par rate（零 point）</strong>报，另外附一套买 1 point 的方案。
+        </div>
+        <div class="tip">
+          <p><strong>让所有人在同一天上午发报价。</strong>利率天天变，隔三天的报价没有可比性。约好"周三上午都发给我"。</p>
+          <p>所有信用查询集中在 <strong>14 天内</strong>完成，房贷有特殊规则，多家查询只算一次 hard inquiry，不伤分。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="compare-le">
+    <div>
+      <h3>比 Loan Estimate，只看这四行</h3>
+      <div class="body">
+        <p>Loan Estimate 是法定统一格式的三页表，这是唯一能横向比较的东西。<strong>不要信口头报价。</strong></p>
+        <table class="tbl">
+          <thead><tr><th>位置</th><th>看什么</th></tr></thead>
+          <tbody>
+            <tr><td>第 1 页</td><td>Interest Rate、Monthly Principal &amp; Interest</td></tr>
+            <tr><td>第 2 页 Section A</td><td><strong>Origination Charges</strong>——lender 自己收的，各家差异最大，也最能谈</td></tr>
+            <tr><td>第 2 页</td><td>Lender Credits（负数就是返你钱）</td></tr>
+            <tr><td>第 3 页 Comparisons</td><td><strong>In 5 Years</strong> 的总成本——最实在的横比口径</td></tr>
+          </tbody>
+        </table>
+        <p>第 2 页 Section B/C（评估费、产权保险、escrow 服务费）各家差不多，不用在这上面纠结。</p>
+        <p><strong>顺手确认提前还款罚金</strong>：第 1 页 Loan Terms 表格里有一行 <strong>Prepayment Penalty</strong>，看是不是 NO。你这笔是标准 conforming 固定利率自住房贷，Fannie/Freddie 不收购带罚金的贷款，所以几乎必然是 NO——<strong>这是核对项，不是谈判项，别浪费筹码</strong>。成交前的 Closing Disclosure 第 1 页同样位置再看一次。</p>
+        <div class="warn"><p><strong>要"正式的 Loan Estimate"，不是 quote。</strong>lender 只有在你提交了含具体地址的完整申请后才有法定义务出具 LE，所以比价阶段很多人只给你 worksheet / rate sheet / scenario——格式不统一、没有约束力、没法横向比。用一个你在看的真实地址让他跑一遍正式 LE。<strong>愿不愿意配合这件事，本身就是个信号。</strong></p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="term-15-vs-30">
+    <div>
+      <h3>决定 30 年还是 15 年</h3>
+      <div class="body">
+        <p>你贷款额只有约 $600K，<strong>15 年值得认真算一次</strong>。利差通常 0.5–0.75%，而 30 年省下来的现金流对你意义有限——首付已经压到 50%，月供本来就不高。</p>
+        <p>拿到两套 LE 之后，直接比 5 年总利息差，再决定。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="lender-questions">
+    <div>
+      <h3>打电话时一次问完这四个问题</h3>
+      <div class="body">
+        <p>反正要打一圈电话，这几件比利率差那零点几个点更影响你的实际体验：</p>
+        <table class="tbl">
+          <thead><tr><th>问题</th><th>为什么问</th></tr></thead>
+          <tbody>
+            <tr><td><strong>股票资产怎么折算？</strong></td><td>各家会把 marketable securities 按 70–90% 打折，标准不统一。提交前问清楚，免得算出来和你预期差一截</td></tr>
+            <tr><td><strong>允不允许 recast？最低金额和手续费？</strong></td><td>一次性还一大笔本金后按剩余余额重算月供，期限不变，不用重新核保，通常 $250–500。你首付高、贷款小，这个比利率更实用</td></tr>
+            <tr><td><strong>额外还款怎么入账？</strong></td><td>问清是自动冲抵本金，还是被当成预付下期月供。还款时要单独标注 <code>Apply to principal only</code></td></tr>
+            <tr><td><strong>能不能 waive escrow（免代管账户）？</strong></td><td>你 LTV 只有 50%，远低于 80% 门槛，有资格自己缴税和保险。有些 lender 会收约 0.125% 或调利率——<strong>这个可以谈</strong></td></tr>
+          </tbody>
+        </table>
+        <div class="warn"><p><strong>Recast 的坑</strong>：你的贷款几乎肯定会被卖给别的 servicer，而 <strong>recast 政策跟着 servicer 走，不跟着原始 lender 走</strong>。原 lender 说"我们允许"没有约束力，真正的保障是 <strong>Note（本票）里有没有写</strong>。没写就当它是"可能有"，别拿它当规划前提。</p></div>
+        <p>免 escrow 的代价是要自己记住两个缴税截止日：<strong>12月10日</strong>和<strong>4月10日</strong>。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 阶段 2 ============ -->
+<section class="phase" id="p2">
+  <div class="phase-head">
+    <span class="phase-num">2</span>
+    <h2>预批与签约</h2>
+    <span class="phase-date">9月28日 – 10月10日</span>
+  </div>
+  <p class="phase-note">目标：10 月中旬具备随时出价的能力。</p>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="preapproval-two-step">
+    <div>
+      <h3>两步走：先拿普通 pre-approval，同时送核保排队</h3>
+      <div class="body">
+        <p><strong>材料只交一次，换两个时点的能力。</strong>两者要的东西几乎完全一样（W-2、报税表、paystub、对账单），大部分 lender 对这么做毫无意见。</p>
+        <ol>
+          <li><strong>先出普通 pre-approval</strong>（1–3 天）——万一 9 月底碰到中意的房，手上有东西能出。</li>
+          <li><strong>同一批材料送进 underwriting 排队</strong>（5–10 个工作日）——10 月中拿到，用于真正的竞争期。</li>
+        </ol>
+        <p>拿到的信会写明是哪一档，<strong>卖家的 agent 会去看这行字</strong>。差别不在流程快慢，在 offer 里能写什么：</p>
+        <table class="tbl">
+          <thead><tr><th>变量</th><th>普通 pre-approval</th><th>Fully underwritten</th></tr></thead>
+          <tbody>
+            <tr><td>Loan contingency</td><td>只能写 17–21 天</td><td><strong>敢写 7–10 天，或 waive</strong></td></tr>
+            <tr><td>Close 日期</td><td>30 天</td><td><strong>21 天</strong></td></tr>
+            <tr><td>卖家对贷款会不会黄的顾虑</td><td>有</td><td>基本没有</td></tr>
+          </tbody>
+        </table>
+        <div class="tip"><p>你手上能打的牌不多：价格是硬的，inspection 不能 waive，appraisal 已经准备写 gap 上限。<strong>Loan contingency 是唯一一张既有分量、又对你近乎零成本的牌</strong>——而这张牌的底气只能来自 underwritten。拿普通 pre-approval 就敢 waive loan contingency，那是拿 $36K 订金去赌。</p></div>
+        <div class="warn"><p><strong>Conditions 当天回，不要攒着一起回。</strong>Underwriter 会分批发补件要求，每拖一天整个流程顺延一天。这是最常见的延误原因，而且完全在你控制之内。</p></div>
+        <p>常见 conditions：解释某笔大额入账、401k 贷款证明、雇主电话验证（VOE）。<strong>提前核保的另一个好处，是把这些意外挪到空窗期暴露</strong>——同样的问题出现在 escrow 第 20 天，那时 contingency 可能已经解除，退不出去了。</p>
+        <p>双人申请，underwriter 是一起审的。<strong>配偶那边缺一份 paystub，整笔就停在那。</strong>提交前把两人的文件对着阶段 0 的表逐项过一遍。</p>
+        <p><strong>正式提交只选一家。</strong>前面"并行 2 家"说的是比价阶段拿 Loan Estimate。到这一步两家同时跑，你要伺候两套 conditions，回复速度必然下降——而回复速度是这一步唯一的变量。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="approval-validity">
+    <div>
+      <h3>记住有效期，到期前主动续</h3>
+      <div class="body">
+        <p>卡住的不是"信本身"，是里面最先过期的那份底层文件：</p>
+        <table class="tbl">
+          <thead><tr><th>底层文件</th><th>有效期</th></tr></thead>
+          <tbody>
+            <tr><td>信用报告</td><td>120 天（多数 lender 按 90 天操作）</td></tr>
+            <tr><td>资产文件（对账单）</td><td>60 天</td></tr>
+            <tr><td>收入文件（paystub、VOE）</td><td>30 天</td></tr>
+          </tbody>
+        </table>
+        <p>所以 pre-approval 和 fully underwritten 的实际有效期<strong>都是 60–90 天</strong>——underwritten 的优势在分量，不在更耐放。</p>
+        <div class="tip"><p><strong>续期比重跑快得多</strong>：补最新的 paystub 和对账单，通常 2–3 天；等它彻底过期再重来，一两周。<strong>11 月还没抢到房的话，主动找 lender 续，别等它过期。</strong></p></div>
+        <p>这也是为什么提交时点定在 9 月底到 10 月初：太早，等你 11 月出价时文件已经在补第二轮了。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="freeze-finances">
+    <div>
+      <h3>从提交那天起，财务状况冻结</h3>
+      <div class="body">
+        <p>Underwritten approval 的价值建立在"审过的材料仍然成立"上。这段时间开新卡、换工作、大额转账，等于让之前的核保作废。</p>
+        <div class="warn"><p><strong>阶段 4 里那条"核保冲刺铁律"，从提交那天就已经生效</strong>，不是等到 escrow 才开始。两个人都要守。</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="sign-buyer-agent">
+    <div>
+      <h3>面试并签买方经纪</h3>
+      <div class="body">
+        <p>面试 2–3 位，问这四个问题：</p>
+        <ul>
+          <li>去年在我的目标邮编（95127 / 95131 等）成交了几套？</li>
+          <li>你的买方 offer 接受率大概多少？</li>
+          <li>你怎么帮我拉 comp 定价？</li>
+          <li>佣金怎么收，能不能议？</li>
+        </ul>
+        <p>2024 年 NAR 和解之后，<strong>看房前就必须签书面协议，且必须写明佣金数额</strong>。签之前把这四项确认清楚，都可以要求改：</p>
+        <table class="tbl">
+          <thead><tr><th>条款</th><th>怎么写</th></tr></thead>
+          <tbody>
+            <tr><td>期限</td><td>60–90 天。<strong>不要签一年。</strong></td></tr>
+            <tr><td>地理范围</td><td>限定在实际找房的城市 / 邮编</td></tr>
+            <tr><td>佣金</td><td>写明数额或比例，以及"若卖家 concession 覆盖后有剩余，归谁"</td></tr>
+            <tr><td>终止条款</td><td>能不能提前退出，怎么退</td></tr>
+          </tbody>
+        </table>
+        <div class="tip"><p>避免 <strong>dual agency</strong>（同一经纪或同一家公司同时代表买卖双方）。加州合法但必须披露。问题在于他不可能既帮你砍价又帮卖家抬价。</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="learn-comps">
+    <div>
+      <h3>学会自己读 comp</h3>
+      <div class="body">
+        <p>每次出价前让 agent 拉这组数据：</p>
+        <ul>
+          <li>同邮编，<strong>过去 3 个月的实际成交价</strong>（sold，不是 listing）</li>
+          <li>筛选：同为单层、地皮 4,000–8,000 sqft、面积 ±20%</li>
+          <li>算出 $/sqft 区间，看目标房落在哪一档</li>
+        </ul>
+        <div class="tip"><p><strong>这一步才是防止买贵的真正防线，比任何 contingency 都管用。</strong>自己心里有数，后面出价和评估结果都不会让你意外。如果你算出来值 $1.15M，而竞争把价推到 $1.28M，正确反应是放弃，而不是靠条款事后补救。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 阶段 3 ============ -->
+<section class="phase" id="p3">
+  <div class="phase-head">
+    <span class="phase-num">3</span>
+    <h2>看房与出价</h2>
+    <span class="phase-date">10月中 – 11月</span>
+  </div>
+  <p class="phase-note">秋冬对买方相对有利：新挂牌少，但夏天没卖掉的开始降价，抢的人明显减少。</p>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="pre-offer-48h">
+    <div>
+      <h3>出价前 48 小时的五件事</h3>
+      <div class="body">
+        <ol>
+          <li>通读 disclosure package：<strong>TDS、SPQ、NHD、preliminary title report、termite report</strong>，以及卖家的 pre-sale inspection。</li>
+          <li><strong>NHD 重点看</strong>：是否在高火险区、洪水区、地震断层带。</li>
+          <li>把地址发给保险经纪，确认可保、拿到年费数字。</li>
+          <li>让 lender 把 pre-approval 信改成这个地址和出价金额。</li>
+          <li>自己算一遍 comp，<strong>定出上限价并写下来</strong>。</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="offer-terms">
+    <div>
+      <h3>Offer 条款怎么配</h3>
+      <div class="body">
+        <p>核心思路：<strong>把不花钱的让步给足，把真正保护你的留住。</strong></p>
+        <table class="tbl">
+          <thead><tr><th>条款</th><th>建议写法</th><th>为什么</th></tr></thead>
+          <tbody>
+            <tr><td>EMD 订金</td><td>3%，约 $36K</td><td>标准水平，高一点显诚意</td></tr>
+            <tr><td><strong>Loan contingency</strong></td><td>缩到 7–10 天，或直接 waive</td><td>你已 fully underwritten，风险很低。<strong>最有力的一张牌</strong></td></tr>
+            <tr><td><strong>Appraisal contingency</strong></td><td>保留，但加 gap coverage 上限 $50K</td><td>首付 50% 让你有底气承诺；写上限保护你不至于无限补差价</td></tr>
+            <tr><td><strong>Inspection contingency</strong></td><td><strong>保留 5–7 天，不要 waive</strong></td><td>老房的地基、下水、电路问题动辄几万</td></tr>
+            <tr><td>Close 日期</td><td>21–25 天</td><td>快是优势，但别压到 18 天以内</td></tr>
+            <tr><td>Rent-back</td><td>主动给 30–60 天免费</td><td>不花钱就能显著提升竞争力，卖家常常很在意</td></tr>
+          </tbody>
+        </table>
+        <div class="tip">
+          <p><strong>Appraisal gap coverage 的写法</strong>：不删条款，而是写明"若评估价低于成交价，买方同意自行补足差额，上限 $50,000；超出部分买方保留重新议价或撤销的权利"。</p>
+          <p>对卖家来说几乎等同于 waive，但你的最大损失从"无上限"变成一个你事先认可的数字。特别想要、comp 支撑足的可以写 $75–100K；有点犹豫的写 $25K。</p>
+        </div>
+        <div class="warn"><p><strong>别误会 appraisal contingency 的作用。</strong>它给你的是"可以走人并拿回订金"的权利，不是"卖家必须减价"的权力。抢手的房子，卖家大概率会说"那你走吧"。它的真实价值是止损，不是议价工具。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 阶段 4 ============ -->
+<section class="phase" id="p4">
+  <div class="phase-head">
+    <span class="phase-num">4</span>
+    <h2>Escrow 30 天</h2>
+    <span class="phase-date">从 offer 被接受当天算起</span>
+  </div>
+  <p class="phase-note">下面的 Day 数从 offer 被接受当天开始计。加州 CAR 标准合约默认三个 contingency 都是 17 天。</p>
+
+  <div class="day">
+    <div class="day-n">Day 1–3<span>开 escrow</span></div>
+    <div>
+      <h3>打订金、约验房</h3>
+      <div class="warn">
+        <p><strong>汇 EMD 之前，用你自己查到的电话号码打给 escrow 公司，人工核对账号。</strong>不要用邮件里的号码，不要照邮件里的账号操作。湾区冒充 escrow 的电汇诈骗非常多，钱汇错基本追不回来。</p>
+      </div>
+      <ul>
+        <li>3 个工作日内把 EMD 汇进 escrow（用阶段 0 第一批备好的钱）。</li>
+        <li>通知 lender 开始正式流程，提交购房合约。</li>
+        <li><strong>把所有验房约在 Day 3–5 的同一天</strong>，让 agent 帮你排。</li>
+        <li><strong>第二批卖股：现在下单。</strong>剩余首付 + closing cost 全部卖出，同一天完成。卖出 + T+1 + 转账只要 3–5 天，而你到成交还有 21–30 天，时间宽裕——但别拖到 Day 20 才动。</li>
+        <li>转账当天存好那三份文件：<strong>券商两个月完整对账单 / trade confirmation / 两端转账记录</strong>。这次 underwriter 一定会要，因为贷款已经从 pre-approval 转成正式申请了。</li>
+      </ul>
+      <div class="tip"><p>钱进了银行就别再动，别挪去高息账户"过渡一下"。每挪一次就多一份要解释的文件，而这次是在有时钟压着的时候解释。</p></div>
+    </div>
+  </div>
+
+  <div class="day">
+    <div class="day-n">Day 3–7<span>验房周</span></div>
+    <div>
+      <h3>一天之内查完</h3>
+      <table class="tbl">
+        <thead><tr><th>项目</th><th>费用</th><th>为什么必做</th></tr></thead>
+        <tbody>
+          <tr><td>General inspection</td><td>$600–900</td><td>总体</td></tr>
+          <tr><td><strong>Sewer lateral 内窥镜</strong></td><td>$200–400</td><td>老房高发，换管 $1–2.5 万，<strong>归你负责</strong></td></tr>
+          <tr><td>Foundation / 结构</td><td>$400–600</td><td>查 <strong>cripple wall</strong> 有没有加固过</td></tr>
+          <tr><td>Termite / dry rot</td><td>常由卖家提供</td><td>白蚁、木材腐烂</td></tr>
+          <tr><td>电箱容量</td><td>含在 general 内</td><td>老房常见 100A，升 200A 约 $3–5K</td></tr>
+          <tr><td><strong>Lead / asbestos</strong>（1980 年前建）</td><td>$400–800</td><td>你要自己动手改造，动工前必须知道</td></tr>
+        </tbody>
+      </table>
+      <div class="tip"><p><strong>亲自到场，跟着验房师走一遍。</strong>报告上写的和他当面说的往往不一样，现场能问出更多。带手机重点拍地基下方、屋顶、电箱、热水器。</p></div>
+    </div>
+  </div>
+
+  <div class="day">
+    <div class="day-n">Day 5–10<span>保险 / 产权 / 锁息</span></div>
+    <div>
+      <h3>三件并行</h3>
+      <ul>
+        <li><strong>保险落实</strong>：拿正式报价并绑定（bind）。Lender 要看到保单证明才能放款。</li>
+        <li><strong>审 preliminary title report</strong>：找 easement（别人对你这块地的通行/使用权）和 lien（附着在房子上的债务，跟房不跟人）。有疑问让 escrow 解释清楚。</li>
+        <li><strong>锁利率</strong>：如果过户日在 11 月下旬，直接锁 45 天，别为省小钱锁 30 天。延锁通常每 15 天要付贷款额的 0.125–0.25%，你这就是 $750–1,500。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="day">
+    <div class="day-n">Day 7–12<span>议价</span></div>
+    <div>
+      <h3>Request for Repair：要钱，不要修</h3>
+      <ol>
+        <li>从验房报告里只挑<strong>真正重大</strong>的：结构、下水、电路、屋顶、白蚁。小毛病不要提，提太多容易谈崩。</li>
+        <li>写成要 credit 的形式：<span class="quote" style="display:block;margin-top:8px">买方要求卖方在成交时提供 $X 的 credit，用于〔下水主管更换 / 地基加固〕。</span></li>
+        <li>附上验房报告对应页 + 一份承包商报价，数字有依据，卖家更难驳。</li>
+      </ol>
+      <div class="tip"><p>你打算自己动手，<strong>拿现金比让卖家随便找人修划算得多</strong>。</p></div>
+    </div>
+  </div>
+
+  <div class="day">
+    <div class="day-n">Day 10–17<span>解除条件</span></div>
+    <div>
+      <h3>评估、谈定、签字</h3>
+      <ul>
+        <li><strong>Appraisal</strong>：银行安排，$700–1,000，你先付。</li>
+        <li>谈定 repair credit。</li>
+        <li>签 <strong>Contingency Removal</strong>（条件解除书）。</li>
+      </ul>
+      <div class="warn">
+        <p><strong>加州的 contingency 不会自动过期，必须书面签字才算解除。</strong></p>
+        <p><strong>签之前想清楚：签完再反悔，$36K 订金就没了。</strong>还没准备好可以要求延期，但卖家可以发 Notice to Buyer to Perform，逼你在 2 天内签或退出。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="day">
+    <div class="day-n">Day 15–25<span>核保冲刺</span></div>
+    <div>
+      <h3>这段时间的铁律，两个人都要守</h3>
+      <ul class="rule-list">
+        <li class="no">不开任何新信用账户</li>
+        <li class="no">不买车、不申请分期</li>
+        <li class="no">不换工作、不改收入结构</li>
+        <li class="no">不在账户间大额转账</li>
+        <li class="yes">有任何 condition 当天回</li>
+      </ul>
+      <div class="warn"><p><strong>Lender 会在放款前再拉一次信用。</strong>这个阶段翻车最冤枉——前面全做对了，最后一周办张卡就能毁掉整笔交易。</p></div>
+    </div>
+  </div>
+
+  <div class="day">
+    <div class="day-n">Day 25–27<span>核对账单</span></div>
+    <div>
+      <h3>Closing Disclosure 到手</h3>
+      <p>法律规定必须在签字前<strong>至少 3 个工作日</strong>送到你手上——这 3 天就是给你核对用的。</p>
+      <p><strong>逐项对照最初的 Loan Estimate</strong>：Section A（origination）不应该涨，利率、月供、贷款额要一致。有出入立刻质询，<strong>不要签了再说</strong>。</p>
+    </div>
+  </div>
+
+  <div class="day">
+    <div class="day-n">Day 27–30<span>交割</span></div>
+    <div>
+      <h3>验收、签字、过户</h3>
+      <ol>
+        <li><strong>Final walkthrough</strong>：确认房况没变、约定维修做了、东西清空、电器都在、水电正常。带上验房时拍的照片对比。</li>
+        <li><strong>签字</strong>：在 escrow 或流动 notary 处，约 1 小时，两人都要到场。</li>
+        <li><strong>电汇尾款</strong>——同样要打电话核实账号。</li>
+        <li>Lender funding（放款）→ escrow 送 County Recorder 登记。</li>
+      </ol>
+      <div class="tip"><p><strong>加州以 recording 当天为正式成交日</strong>，不是签字那天。当天拿钥匙。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 阶段 5 ============ -->
+<section class="phase" id="p5">
+  <div class="phase-head">
+    <span class="phase-num">5</span>
+    <h2>成交之后</h2>
+    <span class="phase-date">30 – 60 天内</span>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="homeowners-exemption">
+    <div>
+      <h3>申请 Homeowners' Exemption</h3>
+      <div class="body"><p>向 Santa Clara County Assessor 提交，评估值减 $7,000（每年约省 $70）。网上可办，一次性动作，长期有效。</p></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="supplemental-tax">
+    <div>
+      <h3>留出 supplemental tax bill 的钱</h3>
+      <div class="body">
+        <p>买房后评估值重设为你的成交价，差额部分的税会在<strong>成交后 3–6 个月单独寄一张账单</strong>来。</p>
+        <div class="warn"><p>$1.2M 的房子这一张可能好几千刀，而且<strong>不在 escrow 代缴范围内</strong>。很多人会被打个措手不及——现在就把这笔现金留出来。</p></div>
+        <p>另外，Santa Clara County 实际税率约 1.2–1.3%（1% 基础 + 各类 bond / parcel tax），$1.2M 约 $14–16K/年。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="transfer-utilities">
+    <div>
+      <h3>转水电</h3>
+      <div class="body"><p>95127 大概率是 San Jose Water（私营，比市政贵）。电力走 SJCE，默认是 GreenSource，可以换成 <strong>GreenValue</strong>——费率与 PG&amp;E 标准相当。</p></div>
+    </div>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" class="box" id="check-permits">
+    <div>
+      <h3>动工前查 permit</h3>
+      <div class="body"><p>结构、电路、管道、加建都需要许可。无证施工将来卖房时要披露，也可能被要求拆除重做。</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>2026-09-10 生成 · 勾选状态存在本浏览器的 localStorage，换电脑不会带过去。</p>
+  <p>时间和费用是常规区间，实际以你的 agent、lender、escrow 和 CPA 的意见为准。</p>
+</footer>
+
+</div>
+
+<div class="modal" id="whomodal">
+  <div class="modal-in">
+    <h2>你是谁？</h2>
+    <p>勾选和备注会记上名字，这样两个人都能看出是谁做的。只存在这台设备上，随时可以改。</p>
+    <input id="whoinput" type="text" placeholder="比如 Icen" autocomplete="off">
+    <button id="whosave">就这个</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   配置：把 Apps Script 部署后拿到的 Web App URL 填进下面这行。
+   留空则退回纯本地模式（只存在这台设备的浏览器里）。
+   ============================================================ */
+var API_URL = "https://script.google.com/macros/s/AKfycbzj3pt4QLNik2OZtvNh-Dwad2YhkmchxzEu5hZo0nuqyn-hfBEHTqQczMGTxLIIDAZRUg/exec";
+
+(function () {
+  var K_STATE = 'hb-state-v3', K_QUEUE = 'hb-queue-v3', K_WHO = 'hb-who';
+
+  var boxes = [].slice.call(document.querySelectorAll('.box'));
+  var tally = document.getElementById('tally');
+  var pill  = document.getElementById('syncpill');
+  var whoBtn = document.getElementById('whobtn');
+  var modal = document.getElementById('whomodal');
+  var whoInput = document.getElementById('whoinput');
+
+  var state = load(K_STATE, {});
+  var queue = load(K_QUEUE, []);
+  var who   = localStorage.getItem(K_WHO) || '';
+  var timers = {};
+
+  function load(k, dflt) {
+    try { return JSON.parse(localStorage.getItem(k)) || dflt; } catch (e) { return dflt; }
+  }
+  function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function rec(id) {
+    if (!state[id]) state[id] = { done:false, who:'', updatedAt:'', note:'', noteBy:'', noteAt:'' };
+    return state[id];
+  }
+  function fmt(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d)) return '';
+    return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' +
+           String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  /* ---------- 为每个条目注入备注 UI ---------- */
+  boxes.forEach(function (b) {
+    var body = b.parentNode.querySelector('.body');
+    if (!body) return;
+    var h3 = b.parentNode.querySelector('h3');
+
+    var meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.id = 'meta-' + b.id;
+    if (h3) h3.parentNode.insertBefore(meta, h3.nextSibling);
+
+    var wrap = document.createElement('div');
+    wrap.className = 'noteline';
+    wrap.id = 'note-' + b.id;
+    wrap.innerHTML =
+      '<button class="notebtn" type="button">+ 备注</button>' +
+      '<div class="noteview"></div>' +
+      '<div class="noteby"></div>' +
+      '<textarea class="noteta" rows="3" placeholder="写点什么，比如：已联系 Chase，等回电"></textarea>';
+    body.appendChild(wrap);
+
+    var btn = wrap.querySelector('.notebtn');
+    var ta  = wrap.querySelector('.noteta');
+
+    btn.addEventListener('click', function () {
+      wrap.classList.toggle('open');
+      if (wrap.classList.contains('open')) { ta.focus(); }
+      btn.textContent = wrap.classList.contains('open') ? '收起' : (rec(b.id).note ? '编辑备注' : '+ 备注');
+    });
+
+    ta.addEventListener('input', function () {
+      clearTimeout(timers[b.id]);
+      timers[b.id] = setTimeout(function () {
+        var r = rec(b.id);
+        if (r.note === ta.value) return;
+        r.note = ta.value; r.noteBy = who; r.noteAt = new Date().toISOString();
+        save(K_STATE, state);
+        enqueue({ type:'note', taskId:b.id, note:ta.value, who:who });
+        paint(b.id);
+      }, 700);
+    });
+  });
+
+  /* ---------- 渲染 ---------- */
+  function paint(id) {
+    var b = document.getElementById(id); if (!b) return;
+    var r = rec(id);
+    b.checked = !!r.done;
+    b.closest('.item').classList.toggle('done', b.checked);
+
+    var meta = document.getElementById('meta-' + id);
+    if (meta) meta.textContent = r.done && (r.who || r.updatedAt)
+      ? '✓ ' + (r.who || '有人') + (r.updatedAt ? ' · ' + fmt(r.updatedAt) : '') : '';
+
+    var wrap = document.getElementById('note-' + id);
+    if (wrap) {
+      var has = !!(r.note && r.note.trim());
+      wrap.classList.toggle('has', has);
+      wrap.querySelector('.noteview').textContent = r.note || '';
+      wrap.querySelector('.noteby').textContent =
+        has && (r.noteBy || r.noteAt) ? (r.noteBy || '') + (r.noteAt ? ' · ' + fmt(r.noteAt) : '') : '';
+      var ta = wrap.querySelector('.noteta');
+      if (document.activeElement !== ta) ta.value = r.note || '';
+      if (!wrap.classList.contains('open'))
+        wrap.querySelector('.notebtn').textContent = has ? '编辑备注' : '+ 备注';
+    }
+  }
+  function paintAll() { boxes.forEach(function (b) { paint(b.id); }); count(); }
+  function count() {
+    var n = boxes.filter(function (b) { return rec(b.id).done; }).length;
+    tally.textContent = n + ' / ' + boxes.length;
+  }
+
+  /* ---------- 同步 ---------- */
+  function setPill(cls, txt) { pill.className = 'pill' + (cls ? ' ' + cls : ''); pill.textContent = txt; }
+
+  function enqueue(op) {
+    queue.push(op); save(K_QUEUE, queue);
+    if (!API_URL) { setPill('', '仅本机'); return; }
+    setPill('busy', '待同步 ' + queue.length);
+    clearTimeout(timers.__flush);
+    timers.__flush = setTimeout(flush, 400);
+  }
+
+  function applyQueue() {
+    queue.forEach(function (op) {
+      var r = rec(op.taskId);
+      if (op.type === 'note') { r.note = op.note; r.noteBy = op.who; }
+      else { r.done = !!op.done; r.who = op.who; }
+    });
+  }
+
+  var flushing = false;
+  function flush() {
+    if (!API_URL || flushing || !queue.length) return;
+    flushing = true;
+    var sending = queue.slice();
+    setPill('busy', '同步中…');
+    fetch(API_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ ops: sending })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.ok) throw new Error(j.error || 'server error');
+        queue = queue.slice(sending.length); save(K_QUEUE, queue);
+        state = j.data || {}; applyQueue(); save(K_STATE, state);
+        paintAll();
+        setPill(queue.length ? 'busy' : 'ok', queue.length ? '待同步 ' + queue.length : '已同步');
+      })
+      .catch(function () {
+        setPill('off', '离线 · 待同步 ' + queue.length);
+      })
+      .then(function () {
+        flushing = false;
+        if (queue.length) setTimeout(flush, 8000);
+      });
+  }
+
+  function pull() {
+    if (!API_URL) { setPill('', '仅本机'); return; }
+    setPill('busy', '读取中…');
+    fetch(API_URL, { redirect: 'follow' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.ok) throw new Error(j.error);
+        state = j.data || {}; applyQueue(); save(K_STATE, state);
+        paintAll();
+        if (queue.length) flush(); else setPill('ok', '已同步');
+      })
+      .catch(function () { setPill('off', '离线 · 用本机数据'); });
+  }
+
+  /* ---------- 身份 ---------- */
+  function refreshWho() { whoBtn.textContent = who ? '我是 ' + who : '我是 …'; }
+  function askWho() {
+    whoInput.value = who; modal.classList.add('on');
+    setTimeout(function () { whoInput.focus(); }, 50);
+  }
+  function saveWho() {
+    var v = whoInput.value.trim(); if (!v) return;
+    who = v; localStorage.setItem(K_WHO, who);
+    modal.classList.remove('on'); refreshWho();
+  }
+  whoBtn.addEventListener('click', askWho);
+  document.getElementById('whosave').addEventListener('click', saveWho);
+  whoInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') saveWho(); });
+  modal.addEventListener('click', function (e) { if (e.target === modal && who) modal.classList.remove('on'); });
+
+  /* ---------- 事件 ---------- */
+  boxes.forEach(function (b) {
+    b.addEventListener('change', function () {
+      if (!who) { b.checked = !b.checked; askWho(); return; }
+      var r = rec(b.id);
+      r.done = b.checked; r.who = who; r.updatedAt = new Date().toISOString();
+      save(K_STATE, state); paint(b.id); count();
+      enqueue({ type:'set', taskId:b.id, done:b.checked, who:who });
+    });
+  });
+
+  document.getElementById('reset').addEventListener('click', function () {
+    if (!confirm('清空所有勾选？备注会保留。')) return;
+    boxes.forEach(function (b) {
+      var r = rec(b.id);
+      if (!r.done) return;
+      r.done = false; r.who = who; r.updatedAt = new Date().toISOString();
+      queue.push({ type:'set', taskId:b.id, done:false, who:who });
+    });
+    save(K_STATE, state); save(K_QUEUE, queue); paintAll();
+    if (API_URL) flush(); else setPill('', '仅本机');
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) { if (queue.length) flush(); else pull(); }
+  });
+  window.addEventListener('online', function () { if (queue.length) flush(); });
+
+  /* ---------- 启动 ---------- */
+  refreshWho();
+  paintAll();
+  if (!who) askWho();
+  pull();
+  setInterval(function () { if (!document.hidden && !queue.length) pull(); }, 90000);
+})();
+</script>
+</body>
+</html>
