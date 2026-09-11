@@ -1045,6 +1045,8 @@ function heartD(cx, cy, s) {
     'C' + (cx + a) + ',' + (cy - a * 1.25) + ' ' + (cx + a * 1.15) + ',' + (cy - a * 0.2) + ' ' + cx + ',' + (cy + a * 0.78) + 'Z';
 }
 
+var COARSE = (function () { try { return matchMedia('(pointer: coarse)').matches; } catch (e) { return false; } })();
+
 function drawPins() {
   var u = upp();
   var vis = {}; visible().forEach(function (h) { vis[h.k] = 1; });
@@ -1052,7 +1054,7 @@ function drawPins() {
   var list = houses.filter(function (h) { return h.lat != null; })
     .sort(function (a, b) { return (a.k === selKey) - (b.k === selKey) || STATUS[b.st].rank - STATUS[a.st].rank; });
   list.forEach(function (h) {
-    var x = px(h.lng), y = py(h.lat), r = (h.k === selKey ? 8 : 6.2) * u;
+    var x = px(h.lng), y = py(h.lat), r = (h.k === selKey ? (COARSE ? 9.5 : 8) : (COARSE ? 7.6 : 6.2)) * u;
     var g = el('g', { 'class': 'pin' + (vis[h.k] ? '' : ' dim') + (h.approx ? ' approx' : '') + (h.k === hotKey ? ' hot' : ''), 'data-k': h.k, tabindex: vis[h.k] ? 0 : -1, role: 'button', 'aria-label': h.street + ' ' + h.stLabel });
     if (h.slots.length || h.ohBad.length) {
       g.appendChild(el('line', { x1: x + r * .35, y1: y - r * .6, x2: x + r * .35, y2: y - r - 11 * u, 'class': 'flagpole' }));
@@ -1151,7 +1153,8 @@ function centerOn(h) {
     }
     if (!start) return;
     var dx = e.clientX - start.x, dy = e.clientY - start.y;
-    if (!moved && Math.hypot(dx, dy) > 4) { moved = true; svg.classList.add('drag'); try { svg.setPointerCapture(e.pointerId); } catch (x) {} }
+    var slop = e.pointerType === 'mouse' ? 4 : 10;
+    if (!moved && Math.hypot(dx, dy) > slop) { moved = true; svg.classList.add('drag'); try { svg.setPointerCapture(e.pointerId); } catch (x) {} }
     if (moved) {
       var r = svg.getBoundingClientRect();
       V.x = start.V.x - dx * V.w / r.width; V.y = start.V.y - dy * V.h / r.height; applyView();
@@ -1163,9 +1166,13 @@ function centerOn(h) {
     if (Object.keys(ptrs).length) return;
     svg.classList.remove('drag');
     if (!moved && downT && e.type === 'pointerup') {
-      var pin = downT.closest && downT.closest('.pin'), lm = downT.closest && downT.closest('.lm');
-      if (pin) select(pin.getAttribute('data-k'), { from: 'map' });
-      else if (lm) toggleRing(lm.getAttribute('data-lm'));
+      var lm = downT.closest && downT.closest('.lm');
+      if (lm) { toggleRing(lm.getAttribute('data-lm')); }
+      else {
+        var pin = downT.closest && downT.closest('.pin');
+        var k = pin ? pin.getAttribute('data-k') : nearestKey(e.clientX, e.clientY, e.pointerType === 'mouse' ? 12 : 26);
+        if (k) select(k, { from: 'map' });
+      }
     }
     start = null; downT = null;
   }
@@ -1185,6 +1192,17 @@ function centerOn(h) {
   var ro = new ResizeObserver(function () { fitAspect(); applyView(); tryFirstFit(); });
   ro.observe(svg);
 })();
+/* 手指点不准：在这个屏幕像素半径内找最近的可见房源 */
+function nearestKey(cx, cy, maxPx) {
+  var u = upp(), p = toMap(cx, cy), best = null, bd = Infinity;
+  visible().forEach(function (h) {
+    if (h.lat == null) return;
+    var dx = px(h.lng) - p.x, dy = py(h.lat) - p.y, d = Math.sqrt(dx * dx + dy * dy);
+    if (d < bd) { bd = d; best = h.k; }
+  });
+  return bd <= maxPx * u ? best : null;
+}
+
 function toggleRing(id) { ringOn[id] = !ringOn[id]; save('houses:rings', ringOn); drawScaled(); }
 function markHot() {
   document.querySelectorAll('.card.hot').forEach(function (c) { c.classList.remove('hot'); });
@@ -1279,7 +1297,7 @@ function renderTable() {
 }
 
 /* ================= 详情 / 编辑抽屉 ================= */
-var drawerOpen = false, drawerMode = 'edit', draft = null, orig = null;
+var drawerOpen = false, drawerMode = 'edit', draft = null, orig = null, drawerAt = 0;
 var FIELDS = ['addr', 'status', 'price', 'sold', 'oh', 'pros', 'cons'];
 
 function findH(k) { for (var i = 0; i < houses.length; i++) if (houses[i].k === k) return houses[i]; return null; }
@@ -1305,7 +1323,7 @@ function openDrawer(mode, h) {
   renderDrawer(h);
   $('#drawer').classList.add('on'); $('#drawer').setAttribute('aria-hidden', 'false');
   $('#scrim').classList.add('on');
-  drawerOpen = true;
+  drawerOpen = true; drawerAt = Date.now();
   setTimeout(function () { var f = mode === 'add' ? $('#f-addr') : $('#dClose'); if (f) f.focus(); }, 60);
 }
 function closeDrawer() {
@@ -1429,7 +1447,9 @@ $('#dFav').onclick = function () { if (selKey) toggleFav(selKey); };
 $('#dSave').onclick = saveDrawer;
 $('#dCancel').onclick = function () { draft = Object.assign({}, orig); var h = findH(selKey); renderDrawer(h || {}); };
 $('#dClose').onclick = closeDrawer;
-$('#scrim').onclick = closeDrawer;
+// 手机上点地图选房：pointerup 之后浏览器还会补一个 click，那时遮罩已经盖上，
+// 会立刻把刚打开的抽屉关掉——所以刚打开的半秒内不理会遮罩上的点击。
+$('#scrim').addEventListener('click', function () { if (Date.now() - drawerAt > 500) closeDrawer(); });
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape' && drawerOpen) closeDrawer();
   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && drawerOpen && !$('#dSave').disabled) saveDrawer();
