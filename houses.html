@@ -734,12 +734,12 @@ function applyQueueTo(rows) {
       }
       return;
     }
-    if (op.type === 'attr') {
+    if (op.type === 'attr' || op.type === 'attrEnv') {
       var ak = key(op.addr);
       for (var m = 0; m < rows.length; m++) if (key(rows[m].addr) === ak) rows[m].a = Object.assign({}, rows[m].a, f);
       return;
     }
-    if (op.type === 'enrich') return;
+
     if (op.type === 'update') {
       var k = key(op.addr);
       for (var i = 0; i < rows.length; i++) if (key(rows[i].addr) === k) { Object.assign(rows[i], f); if (f.addr) { rows[i].lat = null; rows[i].lng = null; } return; }
@@ -773,6 +773,7 @@ function pull(attempt) {
       cache = { houses: j.houses, at: j.at }; save(K_CACHE, cache);
       apiState = 'ok'; apiError = ''; lastPull = Date.now();
       rebuild(); renderBanner();
+      setTimeout(function () { enrichQueueRun(6); }, 1500);
       tryFirstFit();
       if (queue.length) flush(); else pillIdle();
     })
@@ -1406,6 +1407,229 @@ function renderTable() {
   $('#cmp').innerHTML = head + body;
 }
 
+/* ================= 环境信息抓取（在浏览器里跑，结果写回表格） =================
+   数据来源：OpenStreetMap（Overpass API）+ EPA Superfund（geopub.epa.gov）。
+   放在网页里跑，Apps Script 就不需要「访问外部网址」的授权。 */
+var OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+var EPA_SF = 'https://geopub.epa.gov/arcgis/rest/services/EMEF/efpoints/MapServer/0/query';
+
+function meters(a, b, c, d) { return miles(a, b, c, d) * 1609.34; }
+function bearingOf(a, b, c, d) {
+  var r = Math.PI / 180;
+  var y = Math.sin((d - b) * r) * Math.cos(c * r);
+  var x = Math.cos(a * r) * Math.sin(c * r) - Math.sin(a * r) * Math.cos(c * r) * Math.cos((d - b) * r);
+  return (Math.atan2(y, x) / r + 360) % 360;
+}
+function compass(deg) { return ['正北', '东北', '正东', '东南', '正南', '西南', '正西', '西北'][Math.round(deg / 45) % 8]; }
+function fmtM(m) { return m < 1000 ? Math.round(m / 10) * 10 + ' 米' : (m / 1609.34).toFixed(1) + ' 英里'; }
+
+function overpassFetch(lat, lng) {
+  var q = '[out:json][timeout:30];(' +
+    'way(around:1200,LAT,LNG)[leisure=park];relation(around:1200,LAT,LNG)[leisure=park];' +
+    'way(around:1000,LAT,LNG)[landuse=cemetery];' +
+    'node(around:700,LAT,LNG)[amenity~"^(fuel|hospital|place_of_worship)$"];' +
+    'node(around:700,LAT,LNG)[shop=funeral_directors];' +
+    'way(around:600,LAT,LNG)[power];node(around:250,LAT,LNG)[power~"^(pole|tower)$"];' +
+    'way(around:1500,LAT,LNG)[railway~"^(rail|light_rail)$"];' +
+    'way(around:1500,LAT,LNG)[highway~"^(motorway|trunk|primary|secondary)$"];' +
+    'way(around:900,LAT,LNG)[highway~"^(footway|path)$"];' +
+    'node(around:1200,LAT,LNG)[shop=supermarket];' +
+    'way(around:1200,LAT,LNG)[natural=water];way(around:1200,LAT,LNG)[waterway=river];' +
+    ');out center tags 300;' +
+    'way(around:160,LAT,LNG)[highway][highway!~"^(footway|path|service|cycleway)$"];out geom 40;';
+  q = q.replace(/LAT/g, lat).replace(/LNG/g, lng);
+  var i = 0;
+  var tryHost = function () {
+    if (i >= OVERPASS.length) return Promise.resolve(null);
+    var url = OVERPASS[i++];
+    return fetch(url, { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return (j && j.elements) ? j.elements : tryHost(); })
+      .catch(function () { return tryHost(); });
+  };
+  return tryHost();
+}
+
+function superfundFetch(lat, lng, km) {
+  var d = km / 111;
+  var box = [lng - d, lat - d, lng + d, lat + d].join(',');
+  var url = EPA_SF + '?f=json&where=1%3D1&returnGeometry=true&outSR=4326&inSR=4326' +
+    '&spatialRel=esriSpatialRelIntersects&geometryType=esriGeometryEnvelope&outFields=*&geometry=' + encodeURIComponent(box);
+  return fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    if (!j || !j.features) return null;
+    var out = [];
+    j.features.forEach(function (f) {
+      var g = f.geometry || {}, at = f.attributes || {};
+      if (g.x == null || g.y == null) return;
+      out.push({
+        name: String(at.primary_name || at.SITE_NAME || at.NAME || '未命名场地'),
+        city: String(at.city_name || ''),
+        d: meters(lat, lng, g.y, g.x)
+      });
+    });
+    out.sort(function (a, b) { return a.d - b.d; });
+    return out;
+  }).catch(function () { return null; });
+}
+
+/* 把抓来的东西变成几句人话 */
+function analyzeEnv(lat, lng, els, sf) {
+  var out = { at: new Date().toISOString().slice(0, 16).replace('T', ' ') }, srcs = [];
+  if (els) {
+    srcs.push('OSM');
+    var near = [], roads = [];
+    els.forEach(function (e) {
+      var t = e.tags || {};
+      if (e.type === 'way' && e.geometry && e.geometry.length && t.highway) roads.push({ t: t, g: e.geometry });
+      var c = e.center || (e.lat != null ? { lat: e.lat, lon: e.lon } : null);
+      if (!c) return;
+      near.push({ t: t, d: meters(lat, lng, c.lat, c.lon), name: t.name || '' });
+    });
+    var pick = function (fn) { var hit = null; near.forEach(function (o) { if (fn(o.t) && (!hit || o.d < hit.d)) hit = o; }); return hit; };
+    var count = function (fn, within) { var n = 0; near.forEach(function (o) { if (fn(o.t) && o.d <= within) n++; }); return n; };
+
+    var park = pick(function (t) { return t.leisure === 'park'; });
+    var parks800 = count(function (t) { return t.leisure === 'park'; }, 800);
+    var trail = pick(function (t) { return t.highway === 'footway' || t.highway === 'path'; });
+    var mkt = pick(function (t) { return t.shop === 'supermarket'; });
+    var walk = [];
+    if (park) walk.push('最近公园 ' + (park.name || '无名') + ' ' + fmtM(park.d)); else walk.push('1.2 公里内没有公园');
+    if (parks800 > 1) walk.push('800 米内 ' + parks800 + ' 个公园');
+    if (trail && trail.d < 500) walk.push('有步道（' + fmtM(trail.d) + '）');
+    if (mkt) walk.push('超市 ' + fmtM(mkt.d));
+    out.walk = walk.join('；');
+
+    var fw = pick(function (t) { return t.highway === 'motorway' || t.highway === 'trunk'; });
+    var art = pick(function (t) { return t.highway === 'primary' || t.highway === 'secondary'; });
+    var rail = pick(function (t) { return t.railway === 'rail' || t.railway === 'light_rail'; });
+    var sjc = meters(lat, lng, 37.3639, -121.9289);
+    var score = 0, why = [];
+    if (fw) {
+      if (fw.d < 200) { score += 3; why.push('高速 ' + (fw.t.ref || '') + ' 就在 ' + fmtM(fw.d)); }
+      else if (fw.d < 500) { score += 2; why.push('离高速 ' + (fw.t.ref || '') + ' ' + fmtM(fw.d)); }
+      else if (fw.d < 1000) { score += 1; why.push('高速 ' + (fw.t.ref || '') + ' ' + fmtM(fw.d)); }
+    }
+    if (art && art.d < 150) { score += 2; why.push('紧邻大路 ' + (art.name || art.t.ref || '')); }
+    else if (art && art.d < 400) { score += 1; why.push('大路 ' + (art.name || art.t.ref || '') + ' ' + fmtM(art.d)); }
+    if (rail && rail.d < 400) { score += 2; why.push('铁路 ' + fmtM(rail.d)); }
+    else if (rail && rail.d < 800) { score += 1; why.push('铁路 ' + fmtM(rail.d)); }
+    var brg = bearingOf(37.3639, -121.9289, lat, lng);
+    var inPath = (Math.abs(((brg - 300 + 540) % 360) - 180) < 25) || (Math.abs(((brg - 120 + 540) % 360) - 180) < 25);
+    if (sjc < 5000 && inPath) { score += 2; why.push('在 SJC 进近方向 ' + fmtM(sjc)); }
+    else if (sjc < 3000) { score += 1; why.push('离 SJC ' + fmtM(sjc)); }
+    out.noise = (score >= 5 ? '吵' : score >= 3 ? '偏吵' : score >= 1 ? '一般' : '安静') +
+      (why.length ? '（' + why.join('；') + '）' : '（附近没有高速、大路、铁路）');
+
+    var pole = pick(function (t) { return t.power === 'pole' || t.power === 'tower'; });
+    var line = pick(function (t) { return t.power === 'line' || t.power === 'minor_line'; });
+    var sub = pick(function (t) { return t.power === 'substation'; });
+    var eh = [];
+    if (pole && pole.d < 120) eh.push('OSM 有电线杆（' + fmtM(pole.d) + '）→ 多半是架空线');
+    if (line && line.d < 300) eh.push((line.t.power === 'line' ? '高压线' : '配电线') + ' ' + fmtM(line.d));
+    if (sub && sub.d < 800) eh.push('变电站 ' + fmtM(sub.d));
+    out.elecHint = eh.length ? eh.join('；') : '';
+
+    var fs = [];
+    var cem = pick(function (t) { return t.landuse === 'cemetery'; });
+    var hosp = pick(function (t) { return t.amenity === 'hospital'; });
+    var fune = pick(function (t) { return t.shop === 'funeral_directors'; });
+    var fuel = pick(function (t) { return t.amenity === 'fuel'; });
+    var wor = pick(function (t) { return t.amenity === 'place_of_worship'; });
+    var water = pick(function (t) { return t.natural === 'water' || t.waterway === 'river'; });
+    if (cem && cem.d < 800) fs.push('墓地 ' + fmtM(cem.d));
+    if (hosp && hosp.d < 400) fs.push('医院 ' + fmtM(hosp.d));
+    if (fune && fune.d < 600) fs.push('殡葬 ' + fmtM(fune.d));
+    if (fuel && fuel.d < 200) fs.push('加油站 ' + fmtM(fuel.d));
+    if (wor && wor.d < 200) fs.push('宗教场所 ' + fmtM(wor.d));
+    if (line && line.d < 150) fs.push('电线从头顶过');
+    if (sub && sub.d < 300) fs.push('变电站很近');
+    if (fw && fw.d < 200) fs.push('正贴高速');
+
+    var bestSeg = null;
+    roads.forEach(function (rd) {
+      for (var i2 = 0; i2 + 1 < rd.g.length; i2++) {
+        var p1 = rd.g[i2], p2 = rd.g[i2 + 1];
+        var mid = { lat: (p1.lat + p2.lat) / 2, lon: (p1.lon + p2.lon) / 2 };
+        var dd = meters(lat, lng, mid.lat, mid.lon);
+        if (!bestSeg || dd < bestSeg.d) bestSeg = { d: dd, mid: mid };
+      }
+    });
+    if (bestSeg && bestSeg.d < 120) {
+      var face = bearingOf(lat, lng, bestSeg.mid.lat, bestSeg.mid.lon);
+      out.face = compass(face) + '（门朝马路，' + Math.round(face) + '°）';
+      if (face > 112 && face < 248) fs.push('朝南向阳');
+      else if (face > 292 || face < 68) fs.push('朝北，冬天少晒太阳');
+    }
+    var hasChong = false;
+    roads.forEach(function (rd) {
+      if (rd.g.length < 2 || hasChong) return;
+      [[rd.g[rd.g.length - 1], rd.g[rd.g.length - 2]], [rd.g[0], rd.g[1]]].forEach(function (pair) {
+        if (hasChong) return;
+        var endP = pair[0], prev = pair[1];
+        var dd = meters(lat, lng, endP.lat, endP.lon);
+        if (dd > 90 || dd < 3) return;
+        var along = bearingOf(prev.lat, prev.lon, endP.lat, endP.lon);
+        var toHouse = bearingOf(endP.lat, endP.lon, lat, lng);
+        if (Math.abs(((along - toHouse + 540) % 360) - 180) < 22) { hasChong = true; fs.push('路口正对房子（路冲，' + fmtM(dd) + '）'); }
+      });
+    });
+    if (water && water.d < 400) fs.push('近水（' + fmtM(water.d) + '，同时留意水患）');
+    out.fs = fs.length ? fs.join('；') : '附近没查到常说的忌讳（墓地/医院/加油站/高压线/路冲）';
+  }
+
+  if (sf) {
+    srcs.push('EPA Superfund');
+    var l = sf.filter(function (o) { return o.d < 5000; });
+    if (!l.length) out.sf = '5 公里内没有 EPA 记录在案的场地';
+    else {
+      var top = l.slice(0, 3).map(function (o) { return o.name + ' ' + fmtM(o.d); });
+      out.sf = (l[0].d < 1000 ? '⚠︎ ' : '') + l.length + ' 处：' + top.join('；');
+    }
+  }
+  out.src = srcs.join(' + ');
+  return out;
+}
+
+/* 抓一处，算完写回表格 */
+function enrichHouse(h) {
+  if (h.lat == null) return Promise.resolve(false);
+  return Promise.all([overpassFetch(h.lat, h.lng), superfundFetch(h.lat, h.lng, 5)])
+    .then(function (res) {
+      var els = res[0], sf = res[1];
+      if (!els && !sf) return false;
+      var env = analyzeEnv(h.lat, h.lng, els, sf);
+      var fields = { at: env.at, src: env.src };
+      ['sf', 'noise', 'walk', 'fs', 'face'].forEach(function (k) { if (env[k]) fields[k] = env[k]; });
+      if (env.elecHint && !h.elec) fields.elec = env.elecHint;
+      enqueue({ type: 'attrEnv', addr: h.addr, fields: fields, at: Date.now() });
+      return true;
+    })
+    .catch(function () { return false; });
+}
+
+/* 没抓过的自动补：一次最多几处，抓完一处歇一下，别把 Overpass 惹毛 */
+var enrichTried = {}, enrichRunning = false;
+function envMissing(h) {
+  if (h.lat == null || h.no) return false;
+  if (enrichTried[h.k]) return false;
+  return !h.a.at || !h.a.noise || /^（/.test(h.a.noise);
+}
+function enrichQueueRun(limit) {
+  if (enrichRunning) return;
+  var todo = houses.filter(envMissing).slice(0, limit || 6);
+  if (!todo.length) return;
+  enrichRunning = true;
+  var i = 0;
+  var step = function () {
+    if (i >= todo.length) { enrichRunning = false; pillIdle(); return; }
+    var h = todo[i++];
+    enrichTried[h.k] = 1;
+    setPill('busy', '正在补环境信息 ' + i + '/' + todo.length);
+    enrichHouse(h).then(function () { setTimeout(step, 1200); });
+  };
+  step();
+}
+
 /* ================= 详情 / 编辑抽屉 ================= */
 var drawerOpen = false, drawerMode = 'edit', draft = null, orig = null, drawerAt = 0;
 var FIELDS = ['addr', 'status', 'price', 'sold', 'oh', 'pros', 'cons'];
@@ -1627,9 +1851,13 @@ $('#dBody').addEventListener('click', function (e) {
   }
   if (e.target.id === 'enrichBtn') {
     var h2 = findH(selKey); if (!h2) return;
-    e.target.disabled = true; e.target.textContent = '抓取中…';
-    enqueue({ type: 'enrich', addr: h2.addr, at: Date.now() });
-    toast('正在抓环境信息，十几秒后回来看');
+    var btn = e.target;
+    btn.disabled = true; btn.textContent = '抓取中…';
+    delete enrichTried[h2.k];
+    enrichHouse(h2).then(function (ok) {
+      btn.disabled = false; btn.textContent = '重新抓一次';
+      toast(ok ? '环境信息已更新' : '这次没抓到（OSM / EPA 没响应），过会儿再试', !ok);
+    });
     return;
   }
   var b = e.target.closest('#seg button'); if (!b) return;

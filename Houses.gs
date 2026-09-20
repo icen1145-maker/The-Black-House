@@ -8,8 +8,8 @@
  *
  *   {type:'fav',    addr:'...', on:true}          ← 爱心收藏
  *   {type:'no',     addr:'...', on:true}          ← 标记「不要了」
- *   {type:'attr',   addr:'...', fields:{bd:3, ba:2, sqft:1400, ...}}  ← 房源属性（写「房源属性」tab）
- *   {type:'enrich', addr:'...'}                    ← 立刻抓一次这处的环境信息
+ *   {type:'attr',    addr:'...', fields:{bd:3, ba:2, sqft:1400, ...}}  ← 手填/粘贴解析出来的硬数据
+ *   {type:'attrEnv', addr:'...', fields:{sf, noise, walk, fs, face, at, src}}  ← 网页抓来的环境信息
  *
  * 只读写 2026 tab 里按表头名找到的 7 列，不增删列、不删行。
  * 收藏 / 不要 存在脚本属性里；房源属性写在单独的「房源属性」tab（见 Attrs.gs）。
@@ -150,34 +150,27 @@ function housesWrite_(body) {
       else props.deleteProperty(mine);
       return;
     }
-    if (op.type === 'attr') {                      // 房源属性：写「房源属性」tab
+    if (op.type === 'attr' || op.type === 'attrEnv') {    // 写「房源属性」tab
       if (!String(op.addr || '').trim()) { errors.push('第 ' + (idx + 1) + ' 条：缺地址'); return; }
+      var allow = op.type === 'attr' ? FACT_KEYS : ENV_KEYS;
       var keep = {};
-      FACT_KEYS.forEach(function (k) { if (fields[k] !== undefined) keep[k] = fields[k]; });
+      allow.forEach(function (k) { if (fields[k] !== undefined) keep[k] = fields[k]; });
+      if (op.type === 'attrEnv' && keep.elec !== undefined) {       // 自动猜的电线不覆盖手选的
+        var had = attrAll_()[normAddr_(op.addr)];
+        if (had && had.elec) delete keep.elec;
+      }
       attrSave_(op.addr, keep);
-      return;
-    }
-    if (op.type === 'enrich') {                    // 立刻抓一次环境信息
-      if (!String(op.addr || '').trim()) { errors.push('第 ' + (idx + 1) + ' 条：缺地址'); return; }
-      var rowsNow = houseRows_(sh, map), target = null;
-      rowsNow.forEach(function (x) { if (normAddr_(x.addr) === normAddr_(op.addr)) target = x; });
-      var cacheNow = props.getProperties();
-      var g2 = target ? geoLookup_(target.addr, { left: 1 }, cacheNow, props) : null;
-      if (!g2) { errors.push('第 ' + (idx + 1) + ' 条：还没有坐标，没法抓 ' + op.addr); return; }
-      var env = enrichOne_(op.addr, g2.lat, g2.lng);
-      var had = attrAll_()[normAddr_(op.addr)];
-      if (env.elecHint) { if (!had || !had.elec) env.elec = env.elecHint; delete env.elecHint; }
-      attrSave_(op.addr, env);
       return;
     }
     if (op.type === 'update') {
       row = findRow(op.addr);
       if (!row) { errors.push('第 ' + (idx + 1) + ' 条：表格里找不到 ' + op.addr); return; }
-      if (fields.addr && normAddr_(fields.addr) !== normAddr_(op.addr)) {   // 改了地址，收藏/不要跟着搬家
+      if (fields.addr && normAddr_(fields.addr) !== normAddr_(op.addr)) {   // 改了地址，收藏/不要/属性跟着搬家
         [[favKey_(op.addr), favKey_(fields.addr)], [noKey_(op.addr), noKey_(fields.addr)]].forEach(function (pair) {
           var v = props.getProperty(pair[0]);
           if (v) { props.setProperty(pair[1], v); props.deleteProperty(pair[0]); }
         });
+        attrRename_(op.addr, fields.addr);
       }
     } else if (op.type === 'add') {
       if (!String(fields.addr || '').trim()) { errors.push('第 ' + (idx + 1) + ' 条：缺地址'); return; }
