@@ -14,7 +14,7 @@
   --rule:#c9c5bd; --rule-2:#ded9d1;
   --blue:#1f5f8b; --blue-soft:#dde8ef;
   --flag:#9c3a22; --flag-soft:#f2e2dc; --done:#41714f; --done-soft:#e1ebe3;
-  --onsale:#3a7d52; --pending:#c08a1e; --sold:#a2412a; --unk:#8d949b; --fav:#b8324f;
+  --onsale:#3a7d52; --pending:#c08a1e; --sold:#a2412a; --unk:#8d949b; --fav:#b8324f; --no:#6c7278;
   --water:#d3dde1; --land:#f8f6f1; --zip:#e2ddd3; --zipon:#ece6d9; --hwy:#cfc7b9; --hwy2:#bdb3a2;
   --mark:#1f5f8b;
   --sans:"Barlow","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
@@ -61,16 +61,16 @@ h1{font-family:var(--cond);font-size:clamp(38px,5.4vw,58px);line-height:1;font-w
 @keyframes blink{50%{opacity:.25}}
 
 /* 统计条：沿用时间表的方格纸样式 */
-.stats{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--ink);
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1px;border:1px solid var(--ink);background:var(--rule)}
+.stat{appearance:none;border:0;text-align:left;padding:12px 14px 11px;cursor:pointer;min-width:0;
   background:repeating-linear-gradient(90deg,transparent 0 19px,var(--rule-2) 19px 20px),repeating-linear-gradient(0deg,transparent 0 19px,var(--rule-2) 19px 20px),var(--paper)}
-.stat{appearance:none;border:0;border-right:1px solid var(--rule);background:transparent;text-align:left;padding:12px 14px 11px;cursor:pointer;min-width:0}
-.stat:last-child{border-right:0}
 .stat:hover{background:rgba(221,232,239,.7)}
 .stat.on{background:var(--blue-soft);box-shadow:inset 0 -3px 0 var(--blue)}
 .stat .k{display:flex;align-items:center;gap:7px;font-family:var(--cond);font-weight:600;font-size:14px;color:var(--ink-2);line-height:1.1}
 .stat .k i{width:9px;height:9px;border-radius:50%;flex:none}
 .stat .v{display:block;font-family:var(--cond);font-weight:700;font-size:30px;line-height:1.05;margin-top:5px}
 .stat.fav .k{color:var(--fav)}
+.stat.no .k{color:var(--no)}
 .stat .d{display:block;font-size:12px;color:var(--ink-3);line-height:1.3;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ---------- 工具条 ---------- */
@@ -98,6 +98,21 @@ h1{font-family:var(--cond);font-size:clamp(38px,5.4vw,58px);line-height:1;font-w
 .favbtn[aria-pressed="true"]{color:var(--fav)}
 .favbtn[aria-pressed="true"] svg path{fill-opacity:1}
 .favbtn.big svg{width:24px;height:24px}
+.nobtn{appearance:none;border:0;background:transparent;padding:3px;margin:-3px 0;cursor:pointer;color:var(--ink-3);flex:none;border-radius:3px;line-height:0}
+.nobtn:hover{color:var(--no);background:var(--paper-2)}
+.nobtn svg{width:18px;height:18px;display:block}
+.nobtn svg circle,.nobtn svg line{stroke:currentColor;stroke-width:2;fill:none}
+.nobtn[aria-pressed="true"]{color:var(--no)}
+.nobtn[aria-pressed="true"] svg circle{fill:currentColor;fill-opacity:.16}
+.nobtn.big svg{width:22px;height:22px}
+.d-head .nobtn{padding:5px;border:1px solid var(--rule);border-radius:2px}
+.d-head .nobtn[aria-pressed="true"]{border-color:var(--no)}
+.card.isno{opacity:.56}
+.card.isno h3{text-decoration:line-through;text-decoration-color:var(--ink-3)}
+.card.isno::before{background:var(--unk)}
+.chip.nochip.on{border-color:var(--no);color:var(--no)}
+.cmp tr.isno td{opacity:.55}
+.cmp td.favcell{width:56px;white-space:nowrap}
 .d-head .favbtn{padding:5px;border:1px solid var(--rule);border-radius:2px}
 .d-head .favbtn[aria-pressed="true"]{border-color:var(--fav)}
 .cmp td.favcell{width:34px;padding-right:0}
@@ -141,6 +156,8 @@ svg#map.drag{cursor:grabbing}
 .pin .flagpole{stroke:var(--ink);stroke-width:1.3;vector-effect:non-scaling-stroke}
 .pin .flag{fill:var(--ink)}
 .pin.dim{opacity:.22}
+.pin.isno{opacity:.5}
+.pin.isno .dot{stroke:#e9e6df}
 .pin.hot .dot{stroke:var(--ink);stroke-width:2.4}
 .plab{font-family:var(--sans);font-weight:600;fill:var(--ink);paint-order:stroke;stroke:rgba(248,246,241,.95);stroke-width:3.2px;stroke-linejoin:round;pointer-events:none}
 .plab.sel{font-weight:700}
@@ -179,6 +196,8 @@ svg#map.drag{cursor:grabbing}
 .fact.oh{background:var(--ink);color:var(--paper);font-weight:600}
 .fact.approx{background:transparent;border:1px dashed var(--ink-3);color:var(--ink-3)}
 .fact.pend{background:var(--blue-soft);color:var(--blue);font-weight:600}
+.fact.warn{background:var(--flag-soft);color:var(--flag);font-weight:600}
+.fact.no{background:var(--unk);color:#fff;font-weight:600}
 .pc{margin:8px 0 0;font-size:14px;line-height:1.55;display:grid;grid-template-columns:16px 1fr;gap:1px 0}
 .pc span.m{font-weight:700;font-family:var(--cond);font-size:15px;line-height:1.45}
 .pc .pro{color:var(--done)} .pc .con{color:var(--flag)}
@@ -270,6 +289,22 @@ table.cmp{border-collapse:collapse;width:100%;font-size:13.5px;min-width:1180px}
 .f input:focus,.f textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
 .f .hint{font-size:12px;color:var(--ink-3);margin-top:4px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.attrgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.af label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);margin-bottom:4px}
+.af input{width:100%;border:1px solid var(--rule);background:#fff;border-radius:2px;padding:7px 9px;font-size:15px}
+.af input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+.elecseg{grid-template-columns:repeat(4,1fr)}
+.elecseg button{font-size:14px;padding:7px 2px}
+.fold.paste{margin-top:12px;border:1px dashed var(--rule);padding:10px 12px}
+.fold.paste summary{cursor:pointer;font-size:13.5px;color:var(--blue)}
+.fold.paste textarea{width:100%;margin:10px 0 8px;border:1px solid var(--rule);border-radius:2px;padding:8px;font-size:14px;resize:vertical}
+.envbox{margin-top:16px;border-top:1px solid var(--rule-2);padding-top:12px}
+.envrow{display:grid;grid-template-columns:92px 1fr;gap:10px;padding:6px 0;font-size:13.5px;border-bottom:1px solid var(--rule-2)}
+.envrow:last-of-type{border-bottom:0}
+.envrow .el{color:var(--ink-3)}
+.envrow .ev{line-height:1.5}
+.envrow .ev.warn{color:var(--flag);font-weight:600}
+.envfoot{margin-top:10px;font-size:12px;color:var(--ink-3);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--ink);border-radius:2px;overflow:hidden}
 .seg button{appearance:none;border:0;border-right:1px solid var(--rule);background:#fff;padding:8px 4px;cursor:pointer;font-family:var(--cond);font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px}
 .seg button:last-child{border-right:0}
@@ -293,8 +328,6 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
   .v-map{grid-template-columns:1fr}
   .mapcol{position:relative;top:0;height:56vh;min-height:320px;margin-bottom:18px}
   .stats{grid-template-columns:repeat(3,1fr)}
-  .stat:nth-child(3n){border-right:0}
-  .stat:nth-child(n+4){border-top:1px solid var(--rule)}
 }
 @media (max-width:640px){
   .wrap{padding-inline:16px}
@@ -304,10 +337,6 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
   .site .tab{padding:0 10px;font-size:16px}
   header.top{padding-block:22px 0}
   .stats{grid-template-columns:repeat(2,1fr)}
-  .stat{border-top:1px solid var(--rule)}
-  .stat:nth-child(-n+2){border-top:0}
-  .stat:nth-child(3),.stat:nth-child(5){border-right:1px solid var(--rule)}
-  .stat:nth-child(2n){border-right:0}
   .stat .v{font-size:26px}
   .views{width:100%}
   .views button{flex:1;padding-inline:6px}
@@ -380,6 +409,7 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
   <div class="tb-row filters" id="filters">
     <span id="stchips" style="display:contents"></span>
     <button class="chip favchip" id="favOnly" type="button" aria-pressed="false">♥ 只看收藏</button>
+    <button class="chip nochip" id="noShow" type="button" aria-pressed="false">显示已排除</button>
     <button class="chip" id="ohOnly" type="button" aria-pressed="false">⚑ 只看有 Open House</button>
     <select class="fsel" id="region" aria-label="区域"></select>
   </div>
@@ -408,6 +438,7 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
           <span>⚑ 有 open house</span>
           <span><svg width="12" height="12" viewBox="0 0 24 24" style="display:block"><path d="M12 20.5 4.2 12.6a4.7 4.7 0 0 1 6.6-6.7l1.2 1.1 1.2-1.1a4.7 4.7 0 0 1 6.6 6.7Z" fill="#b8324f"/></svg>收藏</span>
           <span>虚线点＝位置估算</span>
+          <span style="opacity:.6">灰点＝已排除</span>
         </div>
       </div>
     </div>
@@ -436,6 +467,7 @@ footer{padding-block:40px 60px;font-size:12.5px;color:var(--ink-3)}
       <div class="loc" id="dLoc"></div>
     </div>
     <button class="favbtn big" id="dFav" type="button" aria-pressed="false" aria-label="收藏" title="收藏"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5 4.2 12.6a4.7 4.7 0 0 1 6.6-6.7l1.2 1.1 1.2-1.1a4.7 4.7 0 0 1 6.6 6.7Z"/></svg></button>
+    <button class="nobtn big" id="dNo" type="button" aria-pressed="false" aria-label="标记不要了" title="不要了"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><line x1="6" y1="18" x2="18" y2="6"/></svg></button>
     <button class="x" id="dClose" type="button" aria-label="关闭">×</button>
   </div>
   <div class="d-body" id="dBody"></div>
@@ -542,6 +574,29 @@ function parseFacts(text) {
   return f;
 }
 
+/* 把 Zillow / Redfin 整段描述里的硬数据抠出来 */
+function parseListing(t) {
+  t = String(t || '').replace(/\u00a0/g, ' ');
+  var o = {}, m;
+  m = t.match(/(\d+)\s*(?:bd\b|bds\b|beds?\b|bedrooms?\b|卧室|个?房间)/i); if (m) o.bd = +m[1];
+  m = t.match(/(\d+(?:\.\d)?)\s*(?:ba\b|baths?\b|bathrooms?\b|卫生间|个?浴室)/i); if (m) o.ba = +m[1];
+  // 室内面积：优先「… sqft」但排除写着 lot 的那个
+  var re = /([\d][\d,]{2,6})\s*(?:sq\.?\s*ft|sqft|square\s*feet|平方英尺)/gi, hit;
+  while ((hit = re.exec(t))) {
+    var n = +hit[1].replace(/,/g, '');
+    var ctx = t.slice(Math.max(0, hit.index - 28), hit.index + 34).toLowerCase();
+    if (/lot|地皮|占地|land/.test(ctx)) { if (!o.lot) o.lot = n; }
+    else if (!o.sqft) o.sqft = n;
+  }
+  m = t.match(/lot\s*(?:size)?\s*[:：]?\s*([\d][\d,]{2,6})/i); if (m && !o.lot) o.lot = +m[1].replace(/,/g, '');
+  m = t.match(/([\d.]+)\s*acres?\b/i); if (m && !o.lot) o.lot = Math.round(parseFloat(m[1]) * 43560);
+  m = t.match(/(?:built\s*in|year\s*built|建于|建造年份)\D{0,12}((?:18|19|20)\d{2})/i) ||
+      t.match(/((?:18|19|20)\d{2})\s*年(?:建|造|盖)/);
+  if (m) o.year = +m[1];
+  if (/underground|buried|地埋|入地/i.test(t)) o.elec = '入地（房源描述里提到）';
+  return o;
+}
+
 /* Open House 文本 → [{day, s, e, raw}]，时间用小时（13.5 = 1:30pm） */
 function parseOH(txt) {
   var out = [], bad = [];
@@ -599,11 +654,12 @@ var selKey = null, hotKey = null;
 var view = ui.view || 'map';
 var filt = {
   st: ui.st || { onsale: true, pending: true, sold: true, unknown: true },
-  oh: !!ui.oh, fav: !!ui.fav, region: ui.region || '', q: '', sort: ui.sort || 'region'
+  oh: !!ui.oh, fav: !!ui.fav, no: ui.no || 'hide',   // hide | show | only
+  region: ui.region || '', q: '', sort: ui.sort || 'region'
 };
 var lastPull = 0, apiState = 'init', apiError = '', fitted = false;
 
-function saveUI() { save(K_UI, { view: view, st: filt.st, oh: filt.oh, fav: filt.fav, region: filt.region, sort: filt.sort, tsort: tsort }); }
+function saveUI() { save(K_UI, { view: view, st: filt.st, oh: filt.oh, fav: filt.fav, no: filt.no, region: filt.region, sort: filt.sort, tsort: tsort }); }
 
 /* 原始行 → 页面用的对象 */
 function enrich(raw, idx) {
@@ -611,7 +667,8 @@ function enrich(raw, idx) {
     r: raw.r || null, idx: idx,
     addr: raw.addr || '', cons: raw.cons || '', pros: raw.pros || '', price: raw.price || '',
     sold: raw.sold || '', status: raw.status || '', oh: raw.oh || '',
-    lat: raw.lat, lng: raw.lng, geo: raw.geo || '', fav: !!raw.fav
+    lat: raw.lat, lng: raw.lng, geo: raw.geo || '', fav: !!raw.fav, no: !!raw.no,
+    a: raw.a || {}
   };
   h.k = key(h.addr);
   var pa = parseAddr(h.addr);
@@ -621,6 +678,14 @@ function enrich(raw, idx) {
   h.priceN = priceNum(h.price); h.soldN = priceNum(h.sold);
   h.delta = h.priceN && h.soldN ? (h.soldN - h.priceN) / h.priceN : null;
   h.f = parseFacts(h.pros + ' ' + h.cons);
+  ['bd', 'ba', 'sqft', 'lot', 'year'].forEach(function (k) {     // 「房源属性」tab 里的值优先
+    var v = parseFloat(String(h.a[k] || '').replace(/,/g, ''));
+    if (!isNaN(v) && v > 0) h.f[k] = v;
+  });
+  h.noise = h.a.noise || ''; h.sf = h.a.sf || ''; h.walkInfo = h.a.walk || '';
+  h.fsNote = h.a.fs || ''; h.face = h.a.face || ''; h.elec = h.a.elec || '';
+  h.noiseLevel = (h.noise.match(/^(安静|一般|偏吵|吵)/) || [''])[0];
+  h.sfWarn = /^⚠︎/.test(h.sf);
   h.ppsf = h.priceN && h.f.sqft ? Math.round(h.priceN / h.f.sqft) : null;
   h.region = (G.REGION && G.REGION[h.zip]) || '其他';
   var oh = parseOH(h.oh); h.slots = oh.slots; h.ohBad = oh.bad;
@@ -661,11 +726,20 @@ function rebuild() {
 function applyQueueTo(rows) {
   queue.forEach(function (op) {
     var f = op.fields || {};
-    if (op.type === 'fav') {
+    if (op.type === 'fav' || op.type === 'no') {
       var fk = key(op.addr);
-      for (var j = 0; j < rows.length; j++) if (key(rows[j].addr) === fk) rows[j].fav = !!op.on;
+      for (var j = 0; j < rows.length; j++) if (key(rows[j].addr) === fk) {
+        if (op.type === 'fav') { rows[j].fav = !!op.on; if (op.on) rows[j].no = false; }
+        else { rows[j].no = !!op.on; if (op.on) rows[j].fav = false; }
+      }
       return;
     }
+    if (op.type === 'attr') {
+      var ak = key(op.addr);
+      for (var m = 0; m < rows.length; m++) if (key(rows[m].addr) === ak) rows[m].a = Object.assign({}, rows[m].a, f);
+      return;
+    }
+    if (op.type === 'enrich') return;
     if (op.type === 'update') {
       var k = key(op.addr);
       for (var i = 0; i < rows.length; i++) if (key(rows[i].addr) === k) { Object.assign(rows[i], f); if (f.addr) { rows[i].lat = null; rows[i].lng = null; } return; }
@@ -785,6 +859,8 @@ function visible() {
   var q = filt.q.trim().toLowerCase();
   return houses.filter(function (h) {
     if (!filt.st[h.st]) return false;
+    if (filt.no === 'hide' && h.no) return false;
+    if (filt.no === 'only' && !h.no) return false;
     if (filt.fav && !h.fav) return false;
     if (filt.oh && !h.slots.length && !h.ohBad.length) return false;
     if (filt.region && h.region !== filt.region) return false;
@@ -813,6 +889,13 @@ function sortList(list, how) {
 }
 
 /* ================= 渲染：统计条 + 筛选 ================= */
+function elecShort(t) {
+  t = String(t || '');
+  if (/入地|地埋|underground|buried/i.test(t)) return '入地';
+  if (/侧|后院|backyard|rear/i.test(t)) return '走侧后';
+  if (/架空|头顶|overhead|电线杆|pole/i.test(t)) return '架空';
+  return t.length > 6 ? '待确认' : t;
+}
 function favCount() { var n = 0; houses.forEach(function (h) { if (h.fav) n++; }); return n; }
 function favBtnHTML(h, cls) {
   return '<button class="favbtn' + (cls ? ' ' + cls : '') + '" type="button" data-fav="' + esc(h.k) + '" aria-pressed="' + (h.fav ? 'true' : 'false') +
@@ -824,6 +907,18 @@ function toggleFav(k) {
   enqueue({ type: 'fav', addr: h.addr, on: on, at: Date.now() });
   toast(on ? '♥ 已收藏 ' + h.street : '取消收藏 ' + h.street);
 }
+function noBtnHTML(h, cls) {
+  return '<button class="nobtn' + (cls ? ' ' + cls : '') + '" type="button" data-no="' + esc(h.k) + '" aria-pressed="' + (h.no ? 'true' : 'false') +
+    '" aria-label="' + (h.no ? '取消排除' : '标记不要了') + ' ' + esc(h.street || h.addr) + '" title="' + (h.no ? '取消排除' : '不要了') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><line x1="6" y1="18" x2="18" y2="6"/></svg></button>';
+}
+function toggleNo(k) {
+  var h = findH(k); if (!h) return;
+  var on = !h.no;
+  enqueue({ type: 'no', addr: h.addr, on: on, at: Date.now() });
+  if (on && filt.no === 'hide' && drawerOpen && selKey === k) closeDrawer(true);
+  toast(on ? '已排除 ' + h.street + (filt.no === 'hide' ? '（默认不再显示）' : '') : '放回名单 ' + h.street);
+}
+function noCount() { var n = 0; houses.forEach(function (h) { if (h.no) n++; }); return n; }
 
 function median(a) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; }); var m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; }
 
@@ -832,13 +927,14 @@ function renderStats() {
   houses.forEach(function (h) { by[h.st].push(h); });
   var onP = by.onsale.map(function (h) { return h.priceN; }).filter(function (x) { return x; });
   var deltas = by.sold.map(function (h) { return h.delta; }).filter(function (x) { return x != null; });
-  var wk = houses.filter(function (h) { return h.st !== 'sold' && h.slots.some(function (s) { return s.day === 6 || s.day === 0; }); });
+  var wk = houses.filter(function (h) { return h.st !== 'sold' && !h.no && h.slots.some(function (s) { return s.day === 6 || s.day === 0; }); });
   var favs = houses.filter(function (h) { return h.fav; });
+  var nos = houses.filter(function (h) { return h.no; });
   var only = ST_ORDER.filter(function (k) { return filt.st[k]; });
   var solo = only.length === 1 ? only[0] : null;
   var cell = function (k, label, v, d) {
-    var on = k === 'oh' ? false : k === 'fav' ? filt.fav : solo === k;
-    return '<button class="stat' + (on ? ' on' : '') + (k === 'fav' ? ' fav' : '') + '" data-stat="' + k + '" type="button">' +
+    var on = k === 'oh' ? false : k === 'fav' ? filt.fav : k === 'no' ? filt.no === 'only' : solo === k;
+    return '<button class="stat' + (on ? ' on' : '') + (k === 'fav' || k === 'no' ? ' ' + k : '') + '" data-stat="' + k + '" type="button">' +
       '<span class="k">' + (STATUS[k] ? '<i style="background:' + STATUS[k].color + '"></i>' : '') + label + '</span>' +
       '<span class="v">' + v + '</span><span class="d">' + d + '</span></button>';
   };
@@ -849,6 +945,7 @@ function renderStats() {
     cell('sold', 'Sold', by.sold.length, avgD != null ? '成交比挂牌 ' + (avgD >= 0 ? '+' : '−') + Math.abs(Math.round(avgD * 100)) + '%（' + deltas.length + ' 处）' : '成交价待补') +
     cell('unknown', '未标状态', by.unknown.length, by.unknown.length ? '点开补状态' : '都标好了') +
     cell('fav', '♥ 收藏', favs.length, favs.length ? '点一下只看收藏的' : '点卡片上的爱心来收藏') +
+    cell('no', '🚫 已排除', nos.length, filt.no === 'hide' ? '默认不显示，点一下只看它们' : '点一下切回来') +
     cell('oh', '⚑ 周末 Open House', wk.length, '周六 ' + mdy(nextDate(6)) + ' · 周日 ' + mdy(nextDate(0)));
 }
 
@@ -862,6 +959,9 @@ function renderFilters() {
   var ohb = $('#ohOnly'); ohb.classList.toggle('on', filt.oh); ohb.setAttribute('aria-pressed', filt.oh);
   var fvb = $('#favOnly'); fvb.classList.toggle('on', filt.fav); fvb.setAttribute('aria-pressed', filt.fav);
   fvb.innerHTML = '♥ 只看收藏' + (favCount() ? ' <b>' + favCount() + '</b>' : '');
+  var nsb = $('#noShow'); nsb.hidden = !noCount();
+  nsb.classList.toggle('on', filt.no !== 'hide'); nsb.setAttribute('aria-pressed', filt.no !== 'hide');
+  nsb.innerHTML = (filt.no === 'hide' ? '显示已排除 <b>' + noCount() + '</b>' : filt.no === 'only' ? '只看已排除 <b>' + noCount() + '</b>' : '已排除也显示 <b>' + noCount() + '</b>');
   var regs = {}; houses.forEach(function (h) { regs[h.region] = (regs[h.region] || 0) + 1; });
   var names = Object.keys(regs).sort(function (a, b) {
     var ia = G.REGION_ORDER.indexOf(a), ib = G.REGION_ORDER.indexOf(b); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
@@ -878,6 +978,8 @@ function renderFilters() {
 function factChips(h, withOH) {
   var c = [];
   if (h.pending) c.push('<span class="fact pend">待写入表格</span>');
+  if (h.no) c.push('<span class="fact no">已排除</span>');
+  withOH = withOH && !h.no;                       // 已排除的不再显示 open house
   if (withOH) h.slots.forEach(function (s) { c.push('<span class="fact oh">⚑ ' + DAY_ZH[s.day] + ' ' + slotLabel(s) + '</span>'); });
   if (withOH) h.ohBad.forEach(function (s) { c.push('<span class="fact oh">⚑ ' + esc(s) + '</span>'); });
   if (h.f.bd) c.push('<span class="fact">' + h.f.bd + '卧 ' + h.f.ba + '卫</span>');
@@ -885,6 +987,9 @@ function factChips(h, withOH) {
   if (h.f.lot) c.push('<span class="fact">地 ' + fmtN(h.f.lot) + ' sqft</span>');
   if (h.f.year) c.push('<span class="fact">' + h.f.year + ' 年</span>');
   if (h.ppsf) c.push('<span class="fact">$' + h.ppsf + '/sqft</span>');
+  if (h.elec) c.push('<span class="fact" title="' + esc(h.elec) + '">电线 ' + esc(elecShort(h.elec)) + '</span>');
+  if (h.noiseLevel === '吵' || h.noiseLevel === '偏吵') c.push('<span class="fact warn" title="' + esc(h.noise) + '">🔊 ' + h.noiseLevel + '</span>');
+  if (h.sfWarn) c.push('<span class="fact warn" title="' + esc(h.sf) + '">⚠︎ Superfund 1 公里内</span>');
   if (h.approx) c.push('<span class="fact approx">位置估算</span>');
   return c.length ? '<div class="facts">' + c.join('') + '</div>' : '';
 }
@@ -906,10 +1011,10 @@ function cardHTML(h) {
   if (h.pros) pc += '<span class="m pro">+</span><span>' + esc(h.pros) + '</span>';
   if (h.cons) pc += '<span class="m con">−</span><span>' + esc(h.cons) + '</span>';
   if (!pc) pc = '<span></span><span class="empty">还没记优缺点</span>';
-  return '<article class="card' + (h.k === selKey ? ' sel' : '') + (h.fav ? ' isfav' : '') + '" data-k="' + esc(h.k) + '" tabindex="0" style="--st:' + STATUS[h.st].color + '">' +
+  return '<article class="card' + (h.k === selKey ? ' sel' : '') + (h.fav ? ' isfav' : '') + (h.no ? ' isno' : '') + '" data-k="' + esc(h.k) + '" tabindex="0" style="--st:' + STATUS[h.st].color + '">' +
     '<div class="c-top"><h3>' + esc(h.street) + '</h3>' +
     (h.priceN ? '<span class="c-price">' + fmtP(h.priceN) + '</span>' : '<span class="c-price none">未记价格</span>') +
-    favBtnHTML(h) + '</div>' +
+    favBtnHTML(h) + noBtnHTML(h) + '</div>' +
     '<div class="c-sub"><span class="st">' + esc(h.stLabel) + '</span><span>' + esc([h.city, h.zip].filter(Boolean).join(' ')) + '</span>' +
     (h.soldN ? '<span class="soldv">成交 ' + fmtP(h.soldN) + deltaHTML(h) + '</span>' : '') + '</div>' +
     factChips(h, true) +
@@ -1055,14 +1160,14 @@ function drawPins() {
     .sort(function (a, b) { return (a.k === selKey) - (b.k === selKey) || STATUS[b.st].rank - STATUS[a.st].rank; });
   list.forEach(function (h) {
     var x = px(h.lng), y = py(h.lat), r = (h.k === selKey ? (COARSE ? 9.5 : 8) : (COARSE ? 7.6 : 6.2)) * u;
-    var g = el('g', { 'class': 'pin' + (vis[h.k] ? '' : ' dim') + (h.approx ? ' approx' : '') + (h.k === hotKey ? ' hot' : ''), 'data-k': h.k, tabindex: vis[h.k] ? 0 : -1, role: 'button', 'aria-label': h.street + ' ' + h.stLabel });
-    if (h.slots.length || h.ohBad.length) {
+    var g = el('g', { 'class': 'pin' + (vis[h.k] ? '' : ' dim') + (h.approx ? ' approx' : '') + (h.k === hotKey ? ' hot' : '') + (h.no ? ' isno' : ''), 'data-k': h.k, tabindex: vis[h.k] ? 0 : -1, role: 'button', 'aria-label': h.street + ' ' + h.stLabel + (h.no ? ' 已排除' : '') });
+    if (!h.no && (h.slots.length || h.ohBad.length)) {
       g.appendChild(el('line', { x1: x + r * .35, y1: y - r * .6, x2: x + r * .35, y2: y - r - 11 * u, 'class': 'flagpole' }));
       g.appendChild(el('path', { d: 'M' + (x + r * .35) + ',' + (y - r - 11 * u) + ' l' + 8 * u + ',' + 2.6 * u + ' l' + (-8 * u) + ',' + 2.6 * u + 'Z', 'class': 'flag' }));
     }
-    if (h.fav) g.appendChild(el('path', { d: heartD(x - r * 0.95, y - r * 1.05, 11 * u), 'class': 'favheart' }));
+    if (h.fav && !h.no) g.appendChild(el('path', { d: heartD(x - r * 0.95, y - r * 1.05, 11 * u), 'class': 'favheart' }));
     if (h.k === selKey) g.appendChild(el('circle', { cx: x, cy: y, r: r + 5 * u, 'class': 'halo' }));
-    g.appendChild(el('circle', { cx: x, cy: y, r: r, 'class': 'dot', style: 'fill:' + STATUS[h.st].color }));
+    g.appendChild(el('circle', { cx: x, cy: y, r: h.no ? r * 0.8 : r, 'class': 'dot', style: 'fill:' + (h.no ? 'var(--unk)' : STATUS[h.st].color) }));
     gp.appendChild(g);
   });
   drawLabels(u, vis);
@@ -1212,7 +1317,7 @@ function markHot() {
 /* ================= 周末看房 ================= */
 function renderOH() {
   var box = $('#v-oh');
-  var list = visible().filter(function (h) { return h.st !== 'sold' && (h.slots.length || h.ohBad.length); });
+  var list = visible().filter(function (h) { return h.st !== 'sold' && !h.no && (h.slots.length || h.ohBad.length); });
   var html = '<p class="ohnote">表格「Open House」列只写了星期几和时间，没有日期——下面默认按<strong>最近的这个周末</strong>排。过了周末记得在表格里清掉或换成新时间。已成交的不显示。</p>';
   var days = {};
   list.forEach(function (h) { h.slots.forEach(function (s) { (days[s.day] = days[s.day] || []).push({ h: h, s: s }); }); });
@@ -1251,7 +1356,7 @@ function renderOH() {
 /* ================= 对比表 ================= */
 var tsort = ui.tsort || { k: 'priceN', dir: 1 };
 var COLS = [
-  { k: 'fav', t: '♥', cls: 'favcell', v: function (h) { return h.fav ? 0 : 1; }, h: function (h) { return favBtnHTML(h); } },
+  { k: 'fav', t: '♥ / 🚫', cls: 'favcell', v: function (h) { return (h.fav ? 0 : 1) + (h.no ? 2 : 0); }, h: function (h) { return favBtnHTML(h) + noBtnHTML(h); } },
   { k: 'street', t: '地址', cls: 'addr', v: function (h) { return h.street; }, h: function (h) { return esc(h.street) + '<small>' + esc([h.city, h.zip].filter(Boolean).join(' ')) + '</small>'; } },
   { k: 'st', t: '状态', v: function (h) { return STATUS[h.st].rank; }, h: function (h) { return '<span class="st" style="--st:' + STATUS[h.st].color + '">' + esc(h.stLabel) + '</span>'; } },
   { k: 'priceN', t: '挂牌', num: 1, v: function (h) { return h.priceN; }, h: function (h) { return h.priceN ? fmtP(h.priceN) : ''; }, best: 'min' },
@@ -1261,6 +1366,11 @@ var COLS = [
   { k: 'sqft', t: '室内 sqft', num: 1, v: function (h) { return h.f.sqft; }, h: function (h) { return fmtN(h.f.sqft); }, best: 'max' },
   { k: 'lot', t: '地 sqft', num: 1, v: function (h) { return h.f.lot; }, h: function (h) { return fmtN(h.f.lot); }, best: 'max' },
   { k: 'year', t: '年份', num: 1, v: function (h) { return h.f.year; }, h: function (h) { return h.f.year || ''; } },
+  { k: 'elec', t: '电线', v: function (h) { return elecShort(h.elec); }, h: function (h) { return h.elec ? '<span title="' + esc(h.elec) + '">' + esc(elecShort(h.elec)) + '</span>' : ''; } },
+  { k: 'noise', t: '噪音', v: function (h) { return ['安静', '一般', '偏吵', '吵'].indexOf(h.noiseLevel); }, h: function (h) { return h.noiseLevel ? '<span title="' + esc(h.noise) + '"' + (h.noiseLevel === '吵' || h.noiseLevel === '偏吵' ? ' style="color:var(--flag);font-weight:600"' : '') + '>' + h.noiseLevel + '</span>' : ''; } },
+  { k: 'sf', t: 'Superfund', v: function (h) { return h.sf ? (h.sfWarn ? 2 : 1) : 0; }, h: function (h) { return h.sf ? '<span title="' + esc(h.sf) + '"' + (h.sfWarn ? ' style="color:var(--flag);font-weight:600"' : '') + '>' + (h.sfWarn ? '⚠︎ 1 公里内' : (h.sf.match(/^(\d+) 处/) ? RegExp.$1 + ' 处 / 5 公里' : '无')) + '</span>' : ''; } },
+  { k: 'walk', t: '散步 / 公园', cls: 'txt', v: function (h) { return h.walkInfo; }, h: function (h) { return esc(h.walkInfo); } },
+  { k: 'fs', t: '风水提示', cls: 'txt', v: function (h) { return h.fsNote; }, h: function (h) { return esc(h.fsNote); } },
   { k: 'ppsf', t: '$/sqft', num: 1, v: function (h) { return h.ppsf; }, h: function (h) { return h.ppsf ? '$' + h.ppsf : ''; }, best: 'min' }
 ].concat(G.LANDMARKS.map(function (lm) {
   return { k: 'd-' + lm.id, t: lm.short + ' mi', num: 1, v: function (h) { return h.d[lm.id]; }, h: function (h) { return h.d[lm.id] == null ? '' : h.d[lm.id].toFixed(1); }, best: 'min' };
@@ -1288,7 +1398,7 @@ function renderTable() {
     return '<th class="' + (c.num ? 'num' : '') + '" data-col="' + c.k + '" scope="col">' + c.t + (c.k === tsort.k ? '<span class="ar">' + (tsort.dir > 0 ? '▲' : '▼') + '</span>' : '') + '</th>';
   }).join('') + '</tr></thead>';
   var body = '<tbody>' + list.map(function (h) {
-    return '<tr data-k="' + esc(h.k) + '" tabindex="0">' + COLS.map(function (c) {
+    return '<tr class="' + (h.no ? 'isno' : '') + '" data-k="' + esc(h.k) + '" tabindex="0">' + COLS.map(function (c) {
       var v = c.v(h), cls = [c.cls, c.num ? 'num' : '', (bests[c.k] != null && v === bests[c.k] && h.st !== 'sold') ? 'best' : '', h.st === 'sold' && c.num ? 'dim' : ''].filter(Boolean).join(' ');
       return '<td' + (cls ? ' class="' + cls + '"' : '') + '>' + c.h(h) + '</td>';
     }).join('') + '</tr>';
@@ -1326,8 +1436,8 @@ function openDrawer(mode, h) {
   drawerOpen = true; drawerAt = Date.now();
   setTimeout(function () { var f = mode === 'add' ? $('#f-addr') : $('#dClose'); if (f) f.focus(); }, 60);
 }
-function closeDrawer() {
-  if (drawerDirty() && !confirmLeave()) return;
+function closeDrawer(force) {
+  if (!force && drawerDirty() && !confirmLeave()) return;
   $('#drawer').classList.remove('on'); $('#drawer').setAttribute('aria-hidden', 'true');
   $('#scrim').classList.remove('on');
   drawerOpen = false;
@@ -1353,6 +1463,11 @@ function renderDrawer(h) {
   df.hidden = add;
   df.setAttribute('aria-pressed', h && h.fav ? 'true' : 'false');
   df.setAttribute('title', h && h.fav ? '取消收藏' : '收藏');
+  var dn = $('#dNo');
+  dn.hidden = add;
+  dn.setAttribute('aria-pressed', h && h.no ? 'true' : 'false');
+  dn.setAttribute('title', h && h.no ? '取消排除' : '不要了');
+  attrDraft = null;
   $('#dTitle').textContent = add ? '记一处房源' : h.street;
   $('#dLoc').textContent = add ? '会追加到 2026 tab 最后一行' : [h.city, h.zip, h.region].filter(Boolean).join(' · ') + (h.r ? ' · 表格第 ' + h.r + ' 行' : '');
 
@@ -1380,6 +1495,7 @@ function renderDrawer(h) {
       '<a href="https://www.google.com/search?q=' + encodeURIComponent(h.addr + ' flood zone') + '" target="_blank" rel="noopener">查洪水区 ↗</a>' +
       '</div></div>';
   }
+  if (!add) html += attrSectionHTML(h);
   html += '<div class="d-sec"><h3>' + (add ? '填写（只有地址必填）' : '记录 · 改完点「保存到表格」') + '</h3><div class="form">' +
     fieldIn('addr', '地址', '完整地址，比如 123 Main St, San Jose, CA 95127', 'input') +
     '<div class="f"><label>状态</label><div class="seg" id="seg">' + ST_ORDER.map(function (k) {
@@ -1395,6 +1511,42 @@ function renderDrawer(h) {
   $('#dBody').scrollTop = 0;
   refreshDrawerMsg();
 }
+/* 房源属性：上半是硬数据（可手填/粘贴解析），下半是脚本自动算的环境信息 */
+function attrSectionHTML(h) {
+  var a = h.a || {};
+  var num = function (k, label, ph) {
+    return '<div class="af"><label for="a-' + k + '">' + label + '</label>' +
+      '<input id="a-' + k + '" data-a="' + k + '" inputmode="decimal" value="' + esc(h.f[k] != null ? h.f[k] : '') + '" placeholder="' + ph + '" autocomplete="off"></div>';
+  };
+  var envRow = function (label, val, warn) {
+    if (!val) return '';
+    return '<div class="envrow"><span class="el">' + label + '</span><span class="ev' + (warn ? ' warn' : '') + '">' + esc(val) + '</span></div>';
+  };
+  var elecNow = elecShort(h.elec);
+  return '<div class="d-sec"><h3>房源属性</h3>' +
+    '<div class="attrgrid">' + num('bd', '卧室', '3') + num('ba', '卫生间', '2') + num('sqft', '室内 sqft', '1400') +
+      num('lot', '地皮 sqft', '6000') + num('year', '建造年份', '1962') + '</div>' +
+    '<div class="af" style="margin-top:12px"><label>电线走法</label><div class="seg elecseg">' +
+      ['架空', '走侧后', '入地', '待确认'].map(function (v) {
+        return '<button type="button" data-elec="' + v + '" aria-pressed="' + (elecNow === v) + '">' + v + '</button>';
+      }).join('') + '</div>' +
+      (h.elec && ['架空', '走侧后', '入地', '待确认'].indexOf(elecNow) < 0 ? '<div class="hint">' + esc(h.elec) + '</div>' :
+       (h.a.elec && /OSM/.test(h.a.elec) ? '<div class="hint">' + esc(h.a.elec) + '</div>' : '')) +
+      '<div class="hint"><a href="' + (h.lat != null ? 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + h.lat + ',' + h.lng : '#') + '" target="_blank" rel="noopener">开街景看一眼 ↗</a></div></div>' +
+    '<details class="fold paste"><summary>粘贴 Zillow / Redfin 描述，自动填上面几项</summary>' +
+      '<textarea id="pasteBox" rows="4" placeholder="把房源页面上的描述整段复制进来，比如：3 bd 2 ba 1,326 sqft · Lot 7,614 sqft · Built in 1973"></textarea>' +
+      '<button class="btn quiet" id="parseBtn" type="button">解析并填入</button> <span class="hint" id="parseMsg"></span></details>' +
+    '<div class="envbox">' +
+      envRow('Superfund', a.sf, h.sfWarn) +
+      envRow('噪音', a.noise, h.noiseLevel === '吵' || h.noiseLevel === '偏吵') +
+      envRow('散步 / 公园', a.walk) +
+      envRow('风水提示', a.fs) +
+      envRow('朝向', a.face) +
+      '<div class="envfoot">' + (a.at ? '环境信息 ' + esc(a.at) + ' 自动抓取（' + esc(a.src || '') + '）' : '还没抓过环境信息') +
+      ' <button class="btn quiet" id="enrichBtn" type="button">重新抓一次</button></div>' +
+    '</div></div>';
+}
+
 function fieldIn(f, label, ph, kind) {
   var v = esc(draft[f] || '');
   return '<div class="f"><label for="f-' + f + '">' + label + '</label>' +
@@ -1429,11 +1581,57 @@ function saveDrawer() {
   if (h) { drawerMode = 'edit'; orig = {}; FIELDS.forEach(function (f) { orig[f] = h[f] || ''; }); draft = Object.assign({}, orig); renderDrawer(h); drawPins(); centerOn(h); }
 }
 
+var attrDraft = null;
+function saveAttrs() {
+  var h = findH(selKey); if (!h || !attrDraft) return;
+  var fields = {}, any = false;
+  Object.keys(attrDraft).forEach(function (k) {
+    var v = String(attrDraft[k] == null ? '' : attrDraft[k]).trim();
+    var was = k === 'elec' ? String(h.elec || '') : (h.f[k] != null ? String(h.f[k]) : '');
+    if (v !== was) { fields[k] = v; any = true; }
+  });
+  if (!any) return;
+  enqueue({ type: 'attr', addr: h.addr, fields: fields, at: Date.now() });
+  attrDraft = null;
+  toast('属性已记下，正在写入表格');
+}
+
 $('#dBody').addEventListener('input', function (e) {
+  var a = e.target.getAttribute('data-a');
+  if (a) { attrDraft = attrDraft || {}; attrDraft[a] = e.target.value; clearTimeout(saveAttrs.t); saveAttrs.t = setTimeout(saveAttrs, 900); return; }
   var f = e.target.getAttribute('data-f'); if (!f) return;
   draft[f] = e.target.value; closeDrawer.warned = false; refreshDrawerMsg();
 });
 $('#dBody').addEventListener('click', function (e) {
+  var eb = e.target.closest('.elecseg button');
+  if (eb) {
+    var v = eb.getAttribute('data-elec');
+    document.querySelectorAll('.elecseg button').forEach(function (x) { x.setAttribute('aria-pressed', x === eb); });
+    attrDraft = attrDraft || {}; attrDraft.elec = v; saveAttrs();
+    return;
+  }
+  if (e.target.id === 'parseBtn') {
+    var txt = $('#pasteBox').value, got = parseListing(txt), names = { bd: '卧室', ba: '卫生间', sqft: '室内', lot: '地皮', year: '年份', elec: '电线' };
+    var ks = Object.keys(got);
+    if (!ks.length) { $('#parseMsg').textContent = '没认出来，手填吧'; return; }
+    attrDraft = attrDraft || {};
+    ks.forEach(function (k) {
+      attrDraft[k] = got[k];
+      var inp = document.getElementById('a-' + k); if (inp) inp.value = got[k];
+    });
+    var say = '认出：' + ks.map(function (k) { return names[k] + ' ' + got[k]; }).join('、');
+    $('#parseMsg').textContent = say;
+    saveAttrs();
+    toast(say);
+    return;
+  }
+  if (e.target.id === 'enrichBtn') {
+    var h2 = findH(selKey); if (!h2) return;
+    e.target.disabled = true; e.target.textContent = '抓取中…';
+    enqueue({ type: 'enrich', addr: h2.addr, at: Date.now() });
+    toast('正在抓环境信息，十几秒后回来看');
+    return;
+  }
   var b = e.target.closest('#seg button'); if (!b) return;
   var k = b.getAttribute('data-v');
   draft.status = STATUS[k].write;
@@ -1444,6 +1642,7 @@ $('#dBody').addEventListener('click', function (e) {
   refreshDrawerMsg();
 });
 $('#dFav').onclick = function () { if (selKey) toggleFav(selKey); };
+$('#dNo').onclick = function () { if (selKey) toggleNo(selKey); };
 $('#dSave').onclick = saveDrawer;
 $('#dCancel').onclick = function () { draft = Object.assign({}, orig); var h = findH(selKey); renderDrawer(h || {}); };
 $('#dClose').onclick = closeDrawer;
@@ -1481,6 +1680,7 @@ $('#stats').addEventListener('click', function (e) {
   var k = b.getAttribute('data-stat');
   if (k === 'oh') { setView('oh'); return; }
   if (k === 'fav') { filt.fav = !filt.fav; saveUI(); renderAll(); if (view === 'map') fitHouses(); return; }
+  if (k === 'no') { filt.no = filt.no === 'only' ? 'hide' : 'only'; saveUI(); renderAll(); if (view === 'map') fitHouses(); return; }
   var only = ST_ORDER.filter(function (s) { return filt.st[s]; });
   if (only.length === 1 && only[0] === k) ST_ORDER.forEach(function (s) { filt.st[s] = true; });
   else ST_ORDER.forEach(function (s) { filt.st[s] = s === k; });
@@ -1494,6 +1694,7 @@ $('#stchips').addEventListener('click', function (e) {
 });
 $('#ohOnly').onclick = function () { filt.oh = !filt.oh; saveUI(); renderAll(); };
 $('#favOnly').onclick = function () { filt.fav = !filt.fav; saveUI(); renderAll(); };
+$('#noShow').onclick = function () { filt.no = filt.no === 'hide' ? 'show' : filt.no === 'show' ? 'only' : 'hide'; saveUI(); renderAll(); };
 $('#region').onchange = function () { filt.region = this.value; saveUI(); renderAll(); if (view === 'map') fitHouses(); };
 $('#sort').onchange = function () { filt.sort = this.value; saveUI(); renderList(); };
 $('#q').addEventListener('input', function () { filt.q = this.value; renderAll(); });
@@ -1501,6 +1702,8 @@ $('#q').addEventListener('input', function () { filt.q = this.value; renderAll()
 function openFrom(e) {
   var fb = e.target.closest('[data-fav]');
   if (fb) { e.preventDefault(); e.stopPropagation(); toggleFav(fb.getAttribute('data-fav')); return; }
+  var nb = e.target.closest('[data-no]');
+  if (nb) { e.preventDefault(); e.stopPropagation(); toggleNo(nb.getAttribute('data-no')); return; }
   var t = e.target.closest('[data-k]'); if (!t || t.closest('svg')) return;
   if (t.tagName === 'A') e.preventDefault();
   select(t.getAttribute('data-k'));
@@ -1512,7 +1715,7 @@ function openFrom(e) {
     if (th) { var k = th.getAttribute('data-col'); tsort = { k: k, dir: tsort.k === k ? -tsort.dir : 1 }; ui.tsort = tsort; save(K_UI, Object.assign(load(K_UI, {}), { tsort: tsort })); renderTable(); return; }
     openFrom(e);
   });
-  n.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.target.matches('[data-k]') || e.target.closest('[data-fav]'))) openFrom(e); });
+  n.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.target.matches('[data-k]') || e.target.closest('[data-fav]') || e.target.closest('[data-no]'))) openFrom(e); });
 });
 $('#list').addEventListener('mouseover', function (e) {
   var c = e.target.closest('.card'); var k = c ? c.getAttribute('data-k') : null;
