@@ -1411,7 +1411,12 @@ function renderTable() {
 /* ================= 环境信息抓取（在浏览器里跑，结果写回表格） =================
    数据来源：OpenStreetMap（Overpass API）+ EPA Superfund（geopub.epa.gov）。
    放在网页里跑，Apps Script 就不需要「访问外部网址」的授权。 */
-var OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+var OVERPASS = ['https://overpass.private.coffee/api/interpreter',
+                'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+                'https://overpass-api.de/api/interpreter',
+                'https://overpass.kumi.systems/api/interpreter'];
+var opBad = {};        // 这次访问里已经证明用不了的镜像，后面的房子直接跳过
+var OP_TIMEOUT = 20000;
 var EPA_SF = 'https://geopub.epa.gov/arcgis/rest/services/EMEF/efpoints/MapServer/0/query';
 
 function meters(a, b, c, d) { return miles(a, b, c, d) * 1609.34; }
@@ -1439,14 +1444,23 @@ function overpassFetch(lat, lng) {
     ');out center tags 300;' +
     'way(around:160,LAT,LNG)[highway][highway!~"^(footway|path|service|cycleway)$"];out geom 40;';
   q = q.replace(/LAT/g, lat).replace(/LNG/g, lng);
+  var list = OVERPASS.filter(function (u) { return !opBad[u]; });
+  if (!list.length) { opBad = {}; list = OVERPASS.slice(); }   // 全挂了就重新试一轮
   var i = 0;
   var tryHost = function () {
-    if (i >= OVERPASS.length) return Promise.resolve(null);
-    var url = OVERPASS[i++];
-    return fetch(url, { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { return (j && j.elements) ? j.elements : tryHost(); })
-      .catch(function () { return tryHost(); });
+    if (i >= list.length) return Promise.resolve(null);
+    var url = list[i++];
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, OP_TIMEOUT);   // 镜像太慢就换下一个
+    var opt = { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } };
+    if (ctl) opt.signal = ctl.signal;
+    return fetch(url, opt)
+      .then(function (r) { clearTimeout(timer); return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (j && j.elements) return j.elements;
+        opBad[url] = 1; return tryHost();
+      })
+      .catch(function () { clearTimeout(timer); opBad[url] = 1; return tryHost(); });
   };
   return tryHost();
 }
