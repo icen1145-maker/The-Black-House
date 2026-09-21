@@ -773,7 +773,7 @@ function pull(attempt) {
       cache = { houses: j.houses, at: j.at }; save(K_CACHE, cache);
       apiState = 'ok'; apiError = ''; lastPull = Date.now();
       rebuild(); renderBanner();
-      setTimeout(function () { enrichQueueRun(6); }, 1500);
+      setTimeout(function () { enrichQueueRun(12); }, 1500);
       tryFirstFit();
       if (queue.length) flush(); else pillIdle();
     })
@@ -812,7 +812,8 @@ function flush() {
       apiState = 'ok'; lastPull = Date.now();
       rebuild();
       if (j.ok === false && j.error) toast('有改动没写进去：' + j.error, true);
-      else toast('已写入表格');
+      else if (!queue.length) toast('已写入表格');
+      if (queue.length) setTimeout(flush, 600);        // 写这批的时候又攒了新的，接着写
       if (drawerOpen && drawerMode === 'edit') refreshDrawerMsg();
     })
     .catch(function (err) {
@@ -1616,7 +1617,7 @@ function envMissing(h) {
 }
 function enrichQueueRun(limit) {
   if (enrichRunning) return;
-  var todo = houses.filter(envMissing).slice(0, limit || 6);
+  var todo = houses.filter(envMissing).slice(0, limit || 12);
   if (!todo.length) return;
   enrichRunning = true;
   var i = 0;
