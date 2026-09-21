@@ -297,6 +297,7 @@ table.cmp{border-collapse:collapse;width:100%;font-size:13.5px;min-width:1180px}
 .elecseg button{font-size:14px;padding:7px 2px}
 .fold.paste{margin-top:12px;border:1px dashed var(--rule);padding:10px 12px}
 .fold.paste summary{cursor:pointer;font-size:13.5px;color:var(--blue)}
+.autohint{margin:8px 0 2px;line-height:1.5}
 .fold.paste textarea{width:100%;margin:10px 0 8px;border:1px solid var(--rule);border-radius:2px;padding:8px;font-size:14px;resize:vertical}
 .envbox{margin-top:16px;border-top:1px solid var(--rule-2);padding-top:12px}
 .envrow{display:grid;grid-template-columns:92px 1fr;gap:10px;padding:6px 0;font-size:13.5px;border-bottom:1px solid var(--rule-2)}
@@ -1765,6 +1766,9 @@ function attrSectionHTML(h) {
   return '<div class="d-sec"><h3>房源属性</h3>' +
     '<div class="attrgrid">' + num('bd', '卧室', '3') + num('ba', '卫生间', '2') + num('sqft', '室内 sqft', '1400') +
       num('lot', '地皮 sqft', '6000') + num('year', '建造年份', '1962') + '</div>' +
+    '<div class="hint autohint">' + (a.bd || a.sqft || a.year
+      ? '这几项按公开房源记录自动填好了，改了以你填的为准。'
+      : '还没自动补上——每天早上会自动去查一次，也可以自己填。') + '</div>' +
     '<div class="af" style="margin-top:12px"><label>电线走法</label><div class="seg elecseg">' +
       ['架空', '走侧后', '入地', '待确认'].map(function (v) {
         return '<button type="button" data-elec="' + v + '" aria-pressed="' + (elecNow === v) + '">' + v + '</button>';
@@ -1772,7 +1776,7 @@ function attrSectionHTML(h) {
       (h.elec && ['架空', '走侧后', '入地', '待确认'].indexOf(elecNow) < 0 ? '<div class="hint">' + esc(h.elec) + '</div>' :
        (h.a.elec && /OSM/.test(h.a.elec) ? '<div class="hint">' + esc(h.a.elec) + '</div>' : '')) +
       '<div class="hint"><a href="' + (h.lat != null ? 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + h.lat + ',' + h.lng : '#') + '" target="_blank" rel="noopener">开街景看一眼 ↗</a></div></div>' +
-    '<details class="fold paste"><summary>粘贴 Zillow / Redfin 描述，自动填上面几项</summary>' +
+    '<details class="fold paste"><summary>自己补：粘贴房源描述，自动填上面几项</summary>' +
       '<textarea id="pasteBox" rows="4" placeholder="把房源页面上的描述整段复制进来，比如：3 bd 2 ba 1,326 sqft · Lot 7,614 sqft · Built in 1973"></textarea>' +
       '<button class="btn quiet" id="parseBtn" type="button">解析并填入</button> <span class="hint" id="parseMsg"></span></details>' +
     '<div class="envbox">' +
