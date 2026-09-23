@@ -33,25 +33,39 @@ function listingUrl_(addr, force) {
 }
 
 function findListingUrl_(addr) {
-  var a = String(addr || '').replace(/\s+/g, ' ').trim();
-  var m = a.match(/^(\d+[A-Za-z]?)\s+(.+?),\s*[^,]+,\s*CA\s*(\d{5})/i);
-  if (!m) return '';
-  var num = m[1], street = m[2].trim(), zip = m[3];
-  var want = normAddr_(num + ' ' + street);
-  // sitemap 上方位字母（N/S/E/W）常被省掉，两种都试
-  var tries = [street];
-  var bare = street.replace(/^([NSEW])\s+/i, '');
-  if (bare !== street) tries.push(bare);
+  var a = String(addr || "").replace(/\s+/g, " ").trim();
+  var zm = a.match(/(\d{5})(?:-\d{4})?\s*$/);
+  if (!zm) return "";
+  var zip = zm[1];
+  // 去掉结尾的 CA 95131 / California 95131，剩下 "门牌号 街名[, 城市]"
+  var body2 = a.replace(/,?\s*(CA|California)\s*\d{5}(-\d{4})?\s*$/i, "").replace(/[,\s]+$/, "");
+  var nm = body2.match(/^(\d+[A-Za-z]?)\s+(.+)$/);
+  if (!nm) return "";
+  var num = nm[1], rest = nm[2];
 
-  for (var i = 0; i < tries.length; i++) {
-    var html = get_(REDFIN + '/sitemap/CA/' + zip + '/street/' + encodeURIComponent(tries[i]).replace(/%20/g, '+'));
+  // 街名候选：有逗号就取逗号前那段；没逗号（地址被写坏了）就从短到长试前缀
+  var cands = [];
+  if (rest.indexOf(",") >= 0) cands.push(rest.split(",")[0].trim());
+  else {
+    var w = rest.split(" ");
+    for (var n = Math.min(2, w.length); n <= Math.min(w.length, 5); n++) cands.push(w.slice(0, n).join(" "));
+  }
+  // 方位字母（N/S/E/W）在 sitemap 上常被省掉，两种都试
+  cands.slice().forEach(function (c) {
+    var bare = c.replace(/^([NSEW])\s+/i, "");
+    if (bare !== c && cands.indexOf(bare) < 0) cands.push(bare);
+  });
+
+  for (var i = 0; i < cands.length && i < 6; i++) {
+    var html = get_(REDFIN + "/sitemap/CA/" + zip + "/street/" + encodeURIComponent(cands[i]).replace(/%20/g, "+"));
     if (!html) continue;
+    var want = normAddr_(num + " " + cands[i]);
     var re = /<a[^>]+href="(\/[A-Z]{2}\/[^"]+\/home\/\d+)"[^>]*>([^<]{4,80})<\/a>/g, x;
     while ((x = re.exec(html))) {
       if (normAddr_(x[2]).indexOf(want) === 0) return REDFIN + x[1];
     }
   }
-  return '';
+  return "";
 }
 
 /* ---------- 解析房源页 ---------- */
