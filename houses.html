@@ -306,6 +306,8 @@ table.cmp{border-collapse:collapse;width:100%;font-size:13.5px;min-width:1180px}
 .envrow .ev{line-height:1.5}
 .envrow .ev.warn{color:var(--flag);font-weight:600}
 .envfoot{margin-top:10px;font-size:12px;color:var(--ink-3);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.refreshrow{margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.refreshrow .hint{margin:0}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--ink);border-radius:2px;overflow:hidden}
 .seg button{appearance:none;border:0;border-right:1px solid var(--rule);background:#fff;padding:8px 4px;cursor:pointer;font-family:var(--cond);font-weight:600;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px}
 .seg button:last-child{border-right:0}
@@ -785,6 +787,41 @@ function pull(attempt) {
       apiState = 'off'; apiError = /Unexpected token|JSON/.test(msg) ? 'Apps Script 没有正常返回数据' : msg;
       renderBanner(); pillIdle();
       if (!cache) rebuild();
+    });
+}
+
+/* 单处房源：让 Apps Script 现去房源网站查一次，回写表格并刷新页面 */
+function refreshOne(h, btn) {
+  var msg = $('#reMsg');
+  var label = btn.textContent;
+  btn.disabled = true; btn.textContent = '查询中…';
+  if (msg) msg.textContent = '正在去房源网站查 ' + h.street + '…';
+  setPill('busy', '更新 ' + h.street + '…');
+  fetch(API_URL, {
+    method: 'POST', redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ view: 'houses', ops: [{ type: 'refresh', addr: h.addr }] })
+  })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      btn.disabled = false; btn.textContent = label;
+      if (!j || !Array.isArray(j.houses)) throw new Error((j && j.error) || '接口返回格式不对');
+      cache = { houses: j.houses, at: j.at }; save(K_CACHE, cache);
+      apiState = 'ok'; apiError = ''; lastPull = Date.now();
+      rebuild(); renderBanner(); pillIdle();
+      var fresh = findH(h.k);
+      if (fresh) openDrawer('edit', fresh);
+      var note = (j.refreshed && j.refreshed[0]) || '';
+      var m2 = $('#reMsg');
+      if (j.ok === false && j.error) { if (m2) m2.textContent = j.error; toast(j.error, true); }
+      else { if (m2) m2.textContent = note || '已更新'; toast(note || '已从房源网站更新'); }
+    })
+    .catch(function (err) {
+      btn.disabled = false; btn.textContent = label;
+      var m3 = $('#reMsg');
+      var t = '没查到：' + String(err && err.message || err);
+      if (m3) m3.textContent = t;
+      pillIdle(); toast(t, true);
     });
 }
 
@@ -1716,7 +1753,9 @@ function renderDrawer(h) {
     html += '<div class="d-sec"><div class="pricegrid"><div><small>挂牌</small><b>' + (h.priceN ? fmtP(h.priceN) : '—') + '</b></div>' +
       '<div><small>成交</small><b>' + (h.soldN ? fmtP(h.soldN) : '—') + '</b></div>' +
       '<div><small>' + (h.delta != null ? '成交 vs 挂牌' : '$/sqft') + '</small><b>' + (h.delta != null ? deltaHTML(h) : (h.ppsf ? '$' + h.ppsf : '—')) + '</b></div></div>' +
-      factChips(h, true) + '</div>';
+      factChips(h, true) +
+      '<div class="refreshrow"><button class="btn quiet" id="reBtn" type="button">从房源网站更新一次</button>' +
+      '<span class="hint" id="reMsg">挂牌价 / 成交价 / 状态 / open house</span></div></div>';
     if (h.lat != null) {
       var mx = 12;
       html += '<div class="d-sec"><h3>通勤（直线距离' + (h.approx ? '，位置是估算的' : '') + '）</h3><div class="distbars">' + G.LANDMARKS.map(function (lm) {
@@ -1866,6 +1905,11 @@ $('#dBody').addEventListener('click', function (e) {
     $('#parseMsg').textContent = say;
     saveAttrs();
     toast(say);
+    return;
+  }
+  if (e.target.id === 'reBtn') {
+    var hr = findH(selKey); if (!hr) return;
+    refreshOne(hr, e.target);
     return;
   }
   if (e.target.id === 'enrichBtn') {
