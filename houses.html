@@ -671,6 +671,7 @@ function enrich(raw, idx) {
     addr: raw.addr || '', cons: raw.cons || '', pros: raw.pros || '', price: raw.price || '',
     sold: raw.sold || '', status: raw.status || '', oh: raw.oh || '',
     lat: raw.lat, lng: raw.lng, geo: raw.geo || '', fav: !!raw.fav, no: !!raw.no,
+    rf: raw.rf || '',                                  // Apps Script 存的 Redfin 房源页
     a: raw.a || {}
   };
   h.k = key(h.addr);
