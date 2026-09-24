@@ -1768,7 +1768,8 @@ function renderDrawer(h) {
     var q = encodeURIComponent(h.addr);
     html += '<div class="d-sec"><h3>外部链接</h3><div class="links">' +
       '<a href="https://www.zillow.com/homes/' + encodeURIComponent(h.addr.replace(/,/g, '')).replace(/%20/g, '-') + '_rb/" target="_blank" rel="noopener">Zillow ↗</a>' +
-      '<a href="https://www.redfin.com/search#query=' + q + '" target="_blank" rel="noopener">Redfin ↗</a>' +
+      '<a href="' + (h.rf ? esc(h.rf) : 'https://www.google.com/search?q=' + encodeURIComponent('site:redfin.com "' + String(h.addr).replace(/\s+/g, ' ').trim() + '"')) +
+        '" target="_blank" rel="noopener">Redfin' + (h.rf ? '' : '（搜一下）') + ' ↗</a>' +
       '<a href="https://www.google.com/maps/search/?api=1&query=' + q + '" target="_blank" rel="noopener">Google 地图 ↗</a>' +
       (h.lat != null ? '<a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=' + h.lat + ',' + h.lng + '" target="_blank" rel="noopener">街景 ↗</a>' : '') +
       '<a href="https://www.google.com/search?q=' + encodeURIComponent(h.addr + ' flood zone') + '" target="_blank" rel="noopener">查洪水区 ↗</a>' +

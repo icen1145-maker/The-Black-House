@@ -111,6 +111,8 @@ function housesRead_() {
     if (g) { h.lat = g.lat; h.lng = g.lng; h.geo = g.q; }
     if (cache[favKey_(h.addr)] === '1') h.fav = true;
     if (cache[noKey_(h.addr)] === '1') h.no = true;
+    var rf = cache['url:' + normAddr_(h.addr).slice(0, 180)];   // Listing.gs 存下来的 Redfin 房源页
+    if (rf) h.rf = rf;
     var a = attrs[normAddr_(h.addr)];
     if (a) { var o = {}; ATTR_KEYS.forEach(function (k) { if (k !== 'addr' && a[k]) o[k] = a[k]; }); h.a = o; }
   });
